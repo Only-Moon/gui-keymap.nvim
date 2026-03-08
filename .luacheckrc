@@ -1,0 +1,4 @@
+std = "max"
+globals = {
+  "vim",
+}

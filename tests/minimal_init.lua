@@ -1,5 +1,7 @@
 local plenary_dir = os.getenv("PLENARY_DIR") or (vim.fn.stdpath("data") .. "/plenary.nvim")
-if vim.fn.isdirectory(plenary_dir) == 0 then
+local is_not_a_directory = vim.fn.isdirectory(plenary_dir) == 0
+
+if is_not_a_directory then
   vim.fn.system({ "git", "clone", "https://github.com/nvim-lua/plenary.nvim", plenary_dir })
 end
 

@@ -1,21 +1,76 @@
 *gui-keymap.txt*     For Neovim >= 0.8.0     Last change: 2026 March 08
 
 ==============================================================================
+Table of Contents                                         *gui-keymap-contents*
+
+1. gui-keymap.nvim                                            |gui-keymap.nvim|
+2. Configuration                                         |gui-keymap-config|
+3. Keymaps                                               |gui-keymap-keymaps|
+4. Commands                                             |gui-keymap-commands|
+
+==============================================================================
 1. gui-keymap.nvim                                               *gui-keymap.nvim*
 
-`gui-keymap.nvim` provides GUI-style keybindings for copy, paste, cut,
-select all, undo, and redo.
+`gui-keymap.nvim` provides GUI-style shortcuts for users moving from editors
+like VSCode, Sublime, and JetBrains IDEs.
+
+It includes safe keymap registration, optional hints, optional Yanky
+integration, and diagnostics.
+
+==============================================================================
+2. Configuration                                            *gui-keymap-config*
 
 >
     require("gui-keymap").setup({
-      copy = true,
-      paste = true,
-      cut = true,
+      undo_redo = true,
+      clipboard = true,
       select_all = true,
-      undo = true,
-      redo = true,
+      delete_selection = true,
+      shift_selection = true,
+      yanky_integration = true,
+      hint_enabled = true,
+      hint_repeat = 3,
+      which_key_integration = true,
     })
 <
+
+Legacy per-shortcut toggles are also accepted:
+`copy`, `paste`, `cut`, `undo`, `redo`.
+
+==============================================================================
+3. Keymaps                                                    *gui-keymap-keymaps*
+
+UNDO/REDO ~
+- `<C-z>` (normal) -> `u`
+- `<C-y>` (normal) -> `<C-r>`
+- `<C-z>` (insert) -> `<C-o>u`
+- `<C-y>` (insert) -> `<C-o><C-r>`
+
+CLIPBOARD ~
+- `<C-c>` (visual) -> `"+y`
+- `<C-c>` (normal) -> `"+yy`
+- `<C-x>` (visual) -> `"+d`
+- `<C-v>` (normal/insert) -> `"+p`
+
+SELECT ALL ~
+- `<C-a>` (normal) -> `ggVG`
+- `<C-a>` (insert) -> `<Esc>ggVG`
+
+DELETE SELECTION ~
+- `<BS>` (visual) -> `"_d`
+- `<Del>` (visual) -> `"_d`
+
+SHIFT SELECTION ~
+- Normal: `<S-Left>`, `<S-Right>`, `<S-Up>`, `<S-Down>`
+- Visual: `<S-Left>`, `<S-Right>`, `<S-Up>`, `<S-Down>`
+- Insert: `<S-Left>`, `<S-Right>`, `<S-Up>`, `<S-Down>`
+
+==============================================================================
+4. Commands                                                 *gui-keymap-commands*
+
+- `:GuiKeymapInfo` - show active maps, conflicts, integration state
+- `:GuiKeymapHintReset` - reset hint counters
+- `:checkhealth gui-keymap` - run plugin health checks
 
 ==============================================================================
 vim:tw=78:ts=8:noet:ft=help:norl:
