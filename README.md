@@ -49,7 +49,7 @@ require("gui-keymap").setup({
   which_key_integration = true,
   enforce_on_startup = true,
   force_priority = true,
-  show_welcome = false,
+  show_welcome = true,
   preserve_mode = true,
 })
 ```
@@ -70,10 +70,8 @@ require("gui-keymap").setup({
 - `which_key_integration`: register active maps with which-key.
 - `enforce_on_startup`: re-apply mappings on lazy startup events.
 - `force_priority`: allow gui-keymap to override preexisting mappings.
-- `show_welcome`: show onboarding message once per session.
+- `show_welcome`: show onboarding only on first install/update (tracked in `stdpath("state")`).
 - `preserve_mode`: return to previous mode after mapped action.
-
-Legacy toggles (`copy`, `paste`, `cut`, `undo`, `redo`) are still accepted.
 
 ## Commands
 

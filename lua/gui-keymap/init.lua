@@ -78,15 +78,20 @@ end
 function M.enable()
   if state.enabled then
     M.apply()
+    vim.notify("gui-keymap: mappings are already enabled and were refreshed", vim.log.levels.INFO, {
+      title = "GuiKeymapEnable",
+    })
     return
   end
   state.enabled = true
   M.apply()
+  vim.notify("gui-keymap: mappings enabled", vim.log.levels.INFO, { title = "GuiKeymapEnable" })
 end
 
 function M.disable()
   state.enabled = false
   utils.clear_plugin_maps()
+  vim.notify("gui-keymap: mappings disabled", vim.log.levels.INFO, { title = "GuiKeymapDisable" })
 end
 
 function M.show_info()
@@ -99,6 +104,7 @@ end
 
 function M.refresh()
   M.apply()
+  vim.notify("gui-keymap: mappings refreshed", vim.log.levels.INFO, { title = "GuiKeymapRefresh" })
 end
 
 function M.list_keymaps()

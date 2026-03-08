@@ -36,12 +36,13 @@ Runtime state is centralized in `lua/gui-keymap/state.lua`.
       which_key_integration = true,
       enforce_on_startup = true,
       force_priority = true,
-      show_welcome = false,
+      show_welcome = true,
       preserve_mode = true,
     })
 <
 
 `hint_repeat = -1` means always show hints.
+`show_welcome` uses persisted state and only appears on first install/update.
 
 ==============================================================================
 3. Commands                                                 *gui-keymap-commands*

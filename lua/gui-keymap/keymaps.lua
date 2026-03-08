@@ -533,6 +533,11 @@ end
 ---@param opts GuiKeymapOptions
 local function apply_yanky_registry(opts)
   local has_yanky = package.loaded["yanky"] ~= nil
+  if not has_yanky then
+    has_yanky = #vim.api.nvim_get_runtime_file("lua/yanky.lua", false) > 0
+      or #vim.api.nvim_get_runtime_file("lua/yanky/init.lua", false) > 0
+  end
+
   utils.set_yanky_status(has_yanky, opts.yanky_integration == true)
 
   if opts.yanky_integration ~= true then
