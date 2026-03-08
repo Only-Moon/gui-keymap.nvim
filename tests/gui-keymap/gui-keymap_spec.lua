@@ -1,0 +1,18 @@
+local plugin = require("gui-keymap")
+
+describe("gui-keymap setup", function()
+  it("merges defaults", function()
+    local opts = plugin.setup()
+    assert.are.same(true, opts.copy)
+    assert.are.same(true, opts.paste)
+    assert.are.same(true, opts.cut)
+    assert.are.same(true, opts.select_all)
+    assert.are.same(true, opts.undo)
+    assert.are.same(true, opts.redo)
+  end)
+
+  it("can disable copy mapping", function()
+    plugin.setup({ copy = false })
+    assert.are.same("", vim.fn.maparg("<C-c>", "n"))
+  end)
+end)
