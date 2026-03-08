@@ -56,7 +56,7 @@ local function is_builtin_default(existing)
     return false
   end
   local desc = existing.desc or ""
-  return desc == "Increment" or desc == "Decrement"
+  return desc == "Increment" or desc == "Decrement" or desc == "Abort"
 end
 
 ---@param mode string
@@ -183,7 +183,29 @@ end
 
 ---@return GuiKeymapConflict[]
 function M.get_conflicts()
-  return M.state.conflicts
+  local fallback_by_shift = {
+    ["<S-Left>"] = "<kL>",
+    ["<S-Right>"] = "<kR>",
+    ["<S-Up>"] = "<kU>",
+    ["<S-Down>"] = "<kD>",
+  }
+
+  local active_index = {}
+  for _, mapping in ipairs(M.state.active_maps) do
+    active_index[mapping.mode .. "::" .. mapping.lhs] = true
+  end
+
+  local filtered = {}
+  for _, conflict in ipairs(M.state.conflicts) do
+    local fallback = fallback_by_shift[conflict.lhs]
+    if fallback and active_index[conflict.mode .. "::" .. fallback] then
+      goto continue
+    end
+    table.insert(filtered, conflict)
+    ::continue::
+  end
+
+  return filtered
 end
 
 return M

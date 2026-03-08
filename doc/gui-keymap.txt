@@ -35,7 +35,7 @@ status integration, and diagnostics.
       which_key_integration = true,
       enforce_on_startup = true,
       force_priority = false,
-      show_welcome = true,
+      show_welcome = false,
       preserve_mode = false,
     })
 <

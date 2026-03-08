@@ -27,6 +27,7 @@ describe("gui-keymap setup", function()
     assert.are.same(3, opts.hint_repeat)
     assert.are.same(true, opts.enforce_on_startup)
     assert.are.same(false, opts.force_priority)
+    assert.are.same(false, opts.show_welcome)
     assert.are.same(false, opts.preserve_mode)
   end)
 

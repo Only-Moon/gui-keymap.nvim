@@ -10,6 +10,7 @@ M.options = config.merge()
 M._enforce_group = nil
 M._welcome_shown = false
 M._setup_done = false
+M._welcome_version = "0.9"
 
 function M.apply()
   hints.setup(M.options)
@@ -49,12 +50,23 @@ local function maybe_show_welcome()
     return
   end
 
+  local state_file = vim.fn.stdpath("state") .. "/gui-keymap-welcome-version"
+  local ok_read, seen = pcall(vim.fn.readfile, state_file)
+  if ok_read and type(seen) == "table" and seen[1] == M._welcome_version then
+    M._welcome_shown = true
+    return
+  end
+
   M._welcome_shown = true
-  vim.notify(
-    "Welcome to gui-keymap.nvim\n\nRun :GuiKeymapDemo to test GUI shortcuts safely.",
-    vim.log.levels.INFO,
-    { title = "gui-keymap" }
-  )
+  vim.defer_fn(function()
+    vim.notify(
+      "Welcome to gui-keymap.nvim. Run :GuiKeymapDemo to test shortcuts safely.",
+      vim.log.levels.INFO,
+      { title = "gui-keymap" }
+    )
+  end, 80)
+
+  pcall(vim.fn.writefile, { M._welcome_version }, state_file)
 end
 
 ---@param user_opts GuiKeymapOptions|nil

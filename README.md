@@ -64,7 +64,7 @@ require("gui-keymap").setup({
   which_key_integration = true,
   enforce_on_startup = true,
   force_priority = false, -- set true to force-override existing mappings
-  show_welcome = true,
+  show_welcome = false, -- set true to show onboarding once per plugin version
   preserve_mode = false, -- return to original mode after mapped action
 })
 ```
