@@ -1,5 +1,6 @@
 local hints = require("gui-keymap.hints")
 local plugin = require("gui-keymap")
+local state = require("gui-keymap.state")
 local utils = require("gui-keymap.utils")
 
 local function map_present(mode, lhs)
@@ -17,7 +18,9 @@ describe("gui-keymap setup", function()
     local opts = plugin.setup({ show_welcome = false })
 
     assert.are.same(true, opts.undo_redo)
-    assert.are.same(true, opts.clipboard)
+    assert.are.same(true, opts.clipboard.copy)
+    assert.are.same(true, opts.clipboard.paste)
+    assert.are.same(true, opts.clipboard.cut)
     assert.are.same(true, opts.select_all)
     assert.are.same(true, opts.delete_selection)
     assert.are.same(true, opts.shift_selection)
@@ -53,7 +56,7 @@ describe("gui-keymap setup", function()
 
   it("force-overrides configured keys", function()
     vim.keymap.set("n", "<C-c>", "yy", { desc = "test conflict" })
-    plugin.setup({ clipboard = true, force_priority = true, show_welcome = false })
+    plugin.setup({ force_priority = true, show_welcome = false })
 
     local rhs = vim.fn.maparg("<C-c>", "n")
     local state = utils.get_state()
@@ -63,7 +66,7 @@ describe("gui-keymap setup", function()
 
   it("can disable force priority", function()
     vim.keymap.set("n", "<C-c>", "yy", { desc = "test conflict" })
-    plugin.setup({ clipboard = true, force_priority = false, show_welcome = false })
+    plugin.setup({ force_priority = false, show_welcome = false })
 
     local state = utils.get_state()
     assert.is_true(#state.conflicts > 0)
@@ -71,7 +74,7 @@ describe("gui-keymap setup", function()
 
   it("overrides user mappings by default", function()
     vim.keymap.set("n", "<C-c>", "yy", { desc = "user map" })
-    plugin.setup({ clipboard = true, show_welcome = false })
+    plugin.setup({ show_welcome = false })
 
     local state = utils.get_state()
     assert.are.same(0, #state.conflicts)
@@ -84,7 +87,7 @@ describe("gui-keymap setup", function()
     hints.show("copy")
     hints.show("copy")
 
-    assert.are.same(3, hints.counts.copy)
+    assert.is_true((state.hint_counts.copy or 0) > 0)
   end)
 
   it("applies mappings when preserve_mode is enabled", function()

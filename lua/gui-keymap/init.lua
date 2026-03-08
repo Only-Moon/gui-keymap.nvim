@@ -2,17 +2,22 @@ local config = require("gui-keymap.config")
 local hints = require("gui-keymap.hints")
 local keymaps = require("gui-keymap.keymaps")
 local info = require("gui-keymap.info")
+local onboard = require("gui-keymap.onboard")
+local state = require("gui-keymap.state")
+local utils = require("gui-keymap.utils")
 
 local M = {}
 
 ---@type GuiKeymapOptions
 M.options = config.merge()
 M._enforce_group = nil
-M._welcome_shown = false
 M._setup_done = false
-M._welcome_version = "0.9"
 
 function M.apply()
+  if not state.enabled then
+    return
+  end
+
   hints.setup(M.options)
   keymaps.apply(M.options)
 end
@@ -45,30 +50,6 @@ function M.setup_enforcement_autocmds()
   })
 end
 
-local function maybe_show_welcome()
-  if M._welcome_shown or not M.options.show_welcome then
-    return
-  end
-
-  local state_file = vim.fn.stdpath("state") .. "/gui-keymap-welcome-version"
-  local ok_read, seen = pcall(vim.fn.readfile, state_file)
-  if ok_read and type(seen) == "table" and seen[1] == M._welcome_version then
-    M._welcome_shown = true
-    return
-  end
-
-  M._welcome_shown = true
-  vim.defer_fn(function()
-    vim.notify(
-      "Welcome to gui-keymap.nvim. Run :GuiKeymapDemo to test shortcuts safely.",
-      vim.log.levels.INFO,
-      { title = "gui-keymap" }
-    )
-  end, 80)
-
-  pcall(vim.fn.writefile, { M._welcome_version }, state_file)
-end
-
 ---@param user_opts GuiKeymapOptions|nil
 ---@return GuiKeymapOptions
 function M.setup(user_opts)
@@ -77,19 +58,35 @@ function M.setup(user_opts)
   end
 
   M.options = config.merge(user_opts)
+  state.set_config(M.options)
 
   local errors = config.validate(M.options)
   if #errors > 0 then
     vim.notify("gui-keymap: invalid configuration: " .. table.concat(errors, ", "), vim.log.levels.WARN)
   end
 
+  state.enabled = true
   M.apply()
   M.setup_enforcement_autocmds()
   schedule_enforcement_passes()
-  maybe_show_welcome()
+  onboard.setup(M.options)
   M._setup_done = true
 
   return M.options
+end
+
+function M.enable()
+  if state.enabled then
+    M.apply()
+    return
+  end
+  state.enabled = true
+  M.apply()
+end
+
+function M.disable()
+  state.enabled = false
+  utils.clear_plugin_maps()
 end
 
 function M.show_info()
@@ -102,6 +99,33 @@ end
 
 function M.refresh()
   M.apply()
+end
+
+function M.list_keymaps()
+  local lines = {}
+  for _, mapping in ipairs(state.get_active_maps()) do
+    table.insert(lines, string.format("[%s] %s -> %s", mapping.mode, mapping.lhs, mapping.desc))
+  end
+
+  if #lines == 0 then
+    vim.notify("gui-keymap: no active mappings", vim.log.levels.INFO)
+    return
+  end
+
+  vim.notify(table.concat(lines, "\n"), vim.log.levels.INFO, { title = "GuiKeymapList" })
+end
+
+---@param key string
+function M.explain_key(key)
+  local item = keymaps.explain_key(key)
+  if not item then
+    vim.notify("gui-keymap: no explanation found for " .. key, vim.log.levels.WARN)
+    return
+  end
+
+  vim.notify(string.format("%s -> %s\nVim equivalent -> %s", key, item.gui, item.vim), vim.log.levels.INFO, {
+    title = "GuiKeymapExplain",
+  })
 end
 
 return M

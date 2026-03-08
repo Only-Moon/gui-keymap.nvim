@@ -1,8 +1,13 @@
 local M = {}
 
+---@class GuiKeymapClipboardOptions
+---@field copy boolean
+---@field paste boolean
+---@field cut boolean
+
 ---@class GuiKeymapOptions
 ---@field undo_redo boolean
----@field clipboard boolean
+---@field clipboard GuiKeymapClipboardOptions|boolean
 ---@field select_all boolean
 ---@field delete_selection boolean
 ---@field shift_selection boolean
@@ -24,7 +29,11 @@ local M = {}
 ---@type GuiKeymapOptions
 M.defaults = {
   undo_redo = true,
-  clipboard = true,
+  clipboard = {
+    copy = true,
+    paste = true,
+    cut = true,
+  },
   select_all = true,
   delete_selection = true,
   shift_selection = true,
@@ -44,15 +53,39 @@ M.defaults = {
   redo = nil,
 }
 
+---@param merged GuiKeymapOptions
+local function normalize_legacy_clipboard_toggles(merged)
+  if type(merged.clipboard) == "boolean" then
+    merged.clipboard = {
+      copy = merged.clipboard,
+      paste = merged.clipboard,
+      cut = merged.clipboard,
+    }
+  end
+
+  if merged.copy ~= nil then
+    merged.clipboard.copy = merged.copy
+  end
+
+  if merged.paste ~= nil then
+    merged.clipboard.paste = merged.paste
+  end
+
+  if merged.cut ~= nil then
+    merged.clipboard.cut = merged.cut
+  end
+end
+
 ---@param user_opts GuiKeymapOptions|nil
 ---@return GuiKeymapOptions
 function M.merge(user_opts)
-  return vim.tbl_deep_extend("force", {}, M.defaults, user_opts or {})
+  local merged = vim.tbl_deep_extend("force", {}, M.defaults, user_opts or {})
+  normalize_legacy_clipboard_toggles(merged)
+  return merged
 end
 
 local boolean_fields = {
   "undo_redo",
-  "clipboard",
   "select_all",
   "delete_selection",
   "shift_selection",
@@ -74,6 +107,20 @@ function M.validate(opts)
   for _, key in ipairs(boolean_fields) do
     if type(opts[key]) ~= "boolean" then
       table.insert(errors, key .. " must be boolean")
+    end
+  end
+
+  if type(opts.clipboard) ~= "table" then
+    table.insert(errors, "clipboard must be a table with copy/paste/cut booleans")
+  else
+    if type(opts.clipboard.copy) ~= "boolean" then
+      table.insert(errors, "clipboard.copy must be boolean")
+    end
+    if type(opts.clipboard.paste) ~= "boolean" then
+      table.insert(errors, "clipboard.paste must be boolean")
+    end
+    if type(opts.clipboard.cut) ~= "boolean" then
+      table.insert(errors, "clipboard.cut must be boolean")
     end
   end
 

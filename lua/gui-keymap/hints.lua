@@ -1,111 +1,165 @@
+local state = require("gui-keymap.state")
+
 local M = {}
 
-local messages = {
+local templates = {
   copy = {
-    intro = "Tip: You copied text. Native Vim copy is `y`.",
-    practice = "Tip: Next time, try `y` for copy.",
-    reinforce = "Nice. Native copy is `y`.",
+    visual = {
+      "Copied selection. Vim equivalent: y",
+      "You can use y in visual mode for the same copy.",
+      "Quick practice: try y next time.",
+    },
+    normal = {
+      "Copied line. Vim equivalent: yy",
+      "You can use yy to copy the current line.",
+      "Quick practice: try yy next time.",
+    },
   },
   paste = {
-    intro = "Tip: You pasted text. Native Vim paste is `p`.",
-    practice = "Tip: Next time, try `p` for paste.",
-    reinforce = "Nice. Native paste is `p`.",
+    default = {
+      "Pasted. Vim equivalent: p",
+      "You can use p for paste in normal mode.",
+      "Quick practice: try p next time.",
+    },
   },
   cut = {
-    intro = "Tip: You cut text. Native Vim delete is `d`.",
-    practice = "Tip: Next time, try `d` for cut/delete.",
-    reinforce = "Nice. Native cut/delete is `d`.",
+    visual = {
+      "Cut selection. Vim equivalent: d",
+      "You can use d in visual mode for the same cut.",
+      "Quick practice: try d next time.",
+    },
+    default = {
+      "Deleted text. Vim equivalent: d",
+      "You can use d for delete/cut behavior.",
+      "Quick practice: try d next time.",
+    },
   },
   select_all = {
-    intro = "Tip: You selected all. Native Vim sequence is `ggVG`.",
-    practice = "Tip: Next time, try `ggVG`.",
-    reinforce = "Nice. Native select-all is `ggVG`.",
+    default = {
+      "Selected all. Vim sequence: ggVG",
+      "You can select all with ggVG.",
+      "Quick practice: try ggVG next time.",
+    },
   },
   undo = {
-    intro = "Tip: You undid a change. Native Vim undo is `u`.",
-    practice = "Tip: Next time, try `u`.",
-    reinforce = "Nice. Native undo is `u`.",
+    default = {
+      "Undo complete. Vim equivalent: u",
+      "You can use u for undo.",
+      "Quick practice: try u next time.",
+    },
   },
   redo = {
-    intro = "Tip: You redid a change. Native Vim redo is `<C-r>`.",
-    practice = "Tip: Next time, try `<C-r>`.",
-    reinforce = "Nice. Native redo is `<C-r>`.",
+    default = {
+      "Redo complete. Vim equivalent: <C-r>",
+      "You can use <C-r> for redo.",
+      "Quick practice: try <C-r> next time.",
+    },
   },
   delete_prev_word = {
-    intro = "Tip: You deleted the previous word. Native Vim is `db`.",
-    practice = "Tip: Next time, try `db`.",
-    reinforce = "Nice. Native previous-word delete is `db`.",
+    default = {
+      "Deleted previous word. Vim equivalent: db",
+      "You can use db to delete the previous word.",
+      "Quick practice: try db next time.",
+    },
   },
   delete_next_word = {
-    intro = "Tip: You deleted the next word. Native Vim is `dw`.",
-    practice = "Tip: Next time, try `dw`.",
-    reinforce = "Nice. Native next-word delete is `dw`.",
+    default = {
+      "Deleted next word. Vim equivalent: dw",
+      "You can use dw to delete the next word.",
+      "Quick practice: try dw next time.",
+    },
   },
 }
 
 M.enabled = true
 M.max_repeat = 3
-M.counts = {}
-M.usage_counts = {}
+M.throttle_ms = 1200
 
----@param usage number
----@return number
-local function usage_stride(usage)
-  if usage <= 2 then
+local function now_ms()
+  return vim.uv.now()
+end
+
+local function normalized_mode(mode)
+  if mode == "v" or mode == "V" or mode == "\22" then
+    return "visual"
+  end
+  if mode == "n" then
+    return "normal"
+  end
+  if mode == "i" then
+    return "insert"
+  end
+  return "default"
+end
+
+local function stage_for_count(shown)
+  if shown <= 0 then
     return 1
   end
-  if usage <= 6 then
+  if shown == 1 then
     return 2
   end
   return 3
 end
 
----@param message table
----@param shown_count number
----@return string
-local function select_message(message, shown_count)
-  if shown_count <= 0 then
-    return message.intro
+local function cadence_ok(shown)
+  if shown <= 2 then
+    return true
   end
-  if shown_count <= 2 then
-    return message.practice
+
+  if shown <= 6 then
+    return shown % 2 == 0
   end
-  return message.reinforce
+
+  return shown % 4 == 0
+end
+
+local function pick_message(hint_key, mode, shown)
+  local bucket = templates[hint_key]
+  if not bucket then
+    return nil
+  end
+
+  local target = bucket[mode] or bucket.default or bucket.normal or bucket.visual
+  if not target then
+    return nil
+  end
+
+  local stage = stage_for_count(shown)
+  return target[stage] or target[#target]
 end
 
 ---@param hint_key string|nil
-function M.show(hint_key)
+---@param mode string|nil
+function M.show(hint_key, mode)
   if not M.enabled or not hint_key then
     return
   end
 
-  local message = messages[hint_key]
+  local last_ts = state.hint_last_ts[hint_key] or 0
+  local ts = now_ms()
+  if ts - last_ts < M.throttle_ms then
+    return
+  end
+
+  local shown = state.hint_counts[hint_key] or 0
+  if M.max_repeat ~= -1 and shown >= M.max_repeat then
+    return
+  end
+
+  if not cadence_ok(shown) then
+    state.hint_counts[hint_key] = shown + 1
+    return
+  end
+
+  local message = pick_message(hint_key, normalized_mode(mode or vim.api.nvim_get_mode().mode), shown)
   if not message then
     return
   end
 
-  local shown_count = M.counts[hint_key] or 0
-  local usage_count = (M.usage_counts[hint_key] or 0) + 1
-  M.usage_counts[hint_key] = usage_count
-
-  if M.max_repeat ~= -1 and shown_count >= M.max_repeat then
-    return
-  end
-
-  if M.max_repeat ~= -1 then
-    local stride = usage_stride(usage_count)
-    if usage_count > 1 and (usage_count - 1) % stride ~= 0 then
-      return
-    end
-  end
-
-  local output = select_message(message, shown_count)
-  if output == nil or output == "" then
-    return
-  end
-
-  M.counts[hint_key] = shown_count + 1
-  vim.notify(output, vim.log.levels.INFO, { title = "gui-keymap" })
+  state.hint_last_ts[hint_key] = ts
+  state.hint_counts[hint_key] = shown + 1
+  vim.notify(message, vim.log.levels.INFO, { title = "gui-keymap" })
 end
 
 ---@param mode string|string[]
@@ -120,15 +174,14 @@ function M.wrap(mode, rhs, hint_key)
   if type(rhs) == "function" then
     return function(...)
       rhs(...)
-      M.show(hint_key)
+      M.show(hint_key, type(mode) == "table" and mode[1] or mode)
     end
   end
 
   return function()
-    local _ = mode
     local keys = vim.api.nvim_replace_termcodes(rhs, true, false, true)
     vim.api.nvim_feedkeys(keys, "n", false)
-    M.show(hint_key)
+    M.show(hint_key, type(mode) == "table" and mode[1] or mode)
   end
 end
 
@@ -136,13 +189,13 @@ end
 function M.setup(opts)
   M.enabled = opts.hint_enabled == true
   M.max_repeat = tonumber(opts.hint_repeat) or 3
-  M.counts = {}
-  M.usage_counts = {}
+  state.hint_counts = {}
+  state.hint_last_ts = {}
 end
 
 function M.reset()
-  M.counts = {}
-  M.usage_counts = {}
+  state.hint_counts = {}
+  state.hint_last_ts = {}
 end
 
 return M

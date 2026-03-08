@@ -12,6 +12,7 @@ local M = {}
 ---@field hint_key string|nil
 ---@field toggle string|nil
 ---@field force boolean|nil
+---@field preserve_mode boolean|nil
 
 ---@type GuiKeymapDefinition[]
 M.registry = {
@@ -24,6 +25,7 @@ M.registry = {
     rhs = "u",
     desc = "gui-keymap: Undo",
     hint_key = "undo",
+    preserve_mode = true,
   },
   {
     feature = "undo_redo",
@@ -34,6 +36,7 @@ M.registry = {
     rhs = "<C-r>",
     desc = "gui-keymap: Redo",
     hint_key = "redo",
+    preserve_mode = true,
   },
   {
     feature = "undo_redo",
@@ -44,6 +47,7 @@ M.registry = {
     rhs = "<C-o>u",
     desc = "gui-keymap: Undo",
     hint_key = "undo",
+    preserve_mode = true,
   },
   {
     feature = "undo_redo",
@@ -54,6 +58,7 @@ M.registry = {
     rhs = "<C-o><C-r>",
     desc = "gui-keymap: Redo",
     hint_key = "redo",
+    preserve_mode = true,
   },
 
   {
@@ -65,6 +70,7 @@ M.registry = {
     rhs = '"+y',
     desc = "gui-keymap: Copy selection",
     hint_key = "copy",
+    preserve_mode = true,
   },
   {
     feature = "clipboard",
@@ -75,6 +81,7 @@ M.registry = {
     rhs = '"+yy',
     desc = "gui-keymap: Copy line",
     hint_key = "copy",
+    preserve_mode = true,
   },
   {
     feature = "clipboard",
@@ -85,6 +92,7 @@ M.registry = {
     rhs = '"+d',
     desc = "gui-keymap: Cut selection",
     hint_key = "cut",
+    preserve_mode = true,
   },
   {
     feature = "clipboard",
@@ -95,6 +103,7 @@ M.registry = {
     rhs = '"+p',
     desc = "gui-keymap: Paste",
     hint_key = "paste",
+    preserve_mode = true,
   },
   {
     feature = "clipboard",
@@ -105,6 +114,7 @@ M.registry = {
     rhs = '"+p',
     desc = "gui-keymap: Paste",
     hint_key = "paste",
+    preserve_mode = true,
   },
 
   {
@@ -115,6 +125,7 @@ M.registry = {
     rhs = "ggVG",
     desc = "gui-keymap: Select all",
     hint_key = "select_all",
+    preserve_mode = false,
   },
   {
     feature = "select_all",
@@ -124,6 +135,7 @@ M.registry = {
     rhs = "<Esc>ggVG",
     desc = "gui-keymap: Select all",
     hint_key = "select_all",
+    preserve_mode = false,
   },
 
   {
@@ -133,6 +145,7 @@ M.registry = {
     lhs = "<BS>",
     rhs = '"_d',
     desc = "gui-keymap: Delete selection",
+    preserve_mode = true,
   },
   {
     feature = "delete_selection",
@@ -141,6 +154,7 @@ M.registry = {
     lhs = "<Del>",
     rhs = '"_d',
     desc = "gui-keymap: Delete selection",
+    preserve_mode = true,
   },
 
   {
@@ -150,6 +164,7 @@ M.registry = {
     lhs = "<S-Left>",
     rhs = "v<Left>",
     desc = "gui-keymap: Select left",
+    preserve_mode = false,
   },
   {
     feature = "shift_selection",
@@ -158,6 +173,7 @@ M.registry = {
     lhs = "<kL>",
     rhs = "v<Left>",
     desc = "gui-keymap: Select left (terminal fallback)",
+    preserve_mode = false,
   },
   {
     feature = "shift_selection",
@@ -166,6 +182,7 @@ M.registry = {
     lhs = "<S-Right>",
     rhs = "v<Right>",
     desc = "gui-keymap: Select right",
+    preserve_mode = false,
   },
   {
     feature = "shift_selection",
@@ -174,6 +191,7 @@ M.registry = {
     lhs = "<kR>",
     rhs = "v<Right>",
     desc = "gui-keymap: Select right (terminal fallback)",
+    preserve_mode = false,
   },
   {
     feature = "shift_selection",
@@ -182,6 +200,7 @@ M.registry = {
     lhs = "<S-Up>",
     rhs = "v<Up>",
     desc = "gui-keymap: Select up",
+    preserve_mode = false,
   },
   {
     feature = "shift_selection",
@@ -190,6 +209,7 @@ M.registry = {
     lhs = "<kU>",
     rhs = "v<Up>",
     desc = "gui-keymap: Select up (terminal fallback)",
+    preserve_mode = false,
   },
   {
     feature = "shift_selection",
@@ -198,6 +218,7 @@ M.registry = {
     lhs = "<S-Down>",
     rhs = "v<Down>",
     desc = "gui-keymap: Select down",
+    preserve_mode = false,
   },
   {
     feature = "shift_selection",
@@ -206,6 +227,7 @@ M.registry = {
     lhs = "<kD>",
     rhs = "v<Down>",
     desc = "gui-keymap: Select down (terminal fallback)",
+    preserve_mode = false,
   },
   {
     feature = "shift_selection",
@@ -214,6 +236,7 @@ M.registry = {
     lhs = "<S-Left>",
     rhs = "<Left>",
     desc = "gui-keymap: Expand selection left",
+    preserve_mode = false,
   },
   {
     feature = "shift_selection",
@@ -222,6 +245,7 @@ M.registry = {
     lhs = "<kL>",
     rhs = "<Left>",
     desc = "gui-keymap: Expand selection left (terminal fallback)",
+    preserve_mode = false,
   },
   {
     feature = "shift_selection",
@@ -230,6 +254,7 @@ M.registry = {
     lhs = "<S-Right>",
     rhs = "<Right>",
     desc = "gui-keymap: Expand selection right",
+    preserve_mode = false,
   },
   {
     feature = "shift_selection",
@@ -238,6 +263,7 @@ M.registry = {
     lhs = "<kR>",
     rhs = "<Right>",
     desc = "gui-keymap: Expand selection right (terminal fallback)",
+    preserve_mode = false,
   },
   {
     feature = "shift_selection",
@@ -246,6 +272,7 @@ M.registry = {
     lhs = "<S-Up>",
     rhs = "<Up>",
     desc = "gui-keymap: Expand selection up",
+    preserve_mode = false,
   },
   {
     feature = "shift_selection",
@@ -254,6 +281,7 @@ M.registry = {
     lhs = "<kU>",
     rhs = "<Up>",
     desc = "gui-keymap: Expand selection up (terminal fallback)",
+    preserve_mode = false,
   },
   {
     feature = "shift_selection",
@@ -262,6 +290,7 @@ M.registry = {
     lhs = "<S-Down>",
     rhs = "<Down>",
     desc = "gui-keymap: Expand selection down",
+    preserve_mode = false,
   },
   {
     feature = "shift_selection",
@@ -270,6 +299,7 @@ M.registry = {
     lhs = "<kD>",
     rhs = "<Down>",
     desc = "gui-keymap: Expand selection down (terminal fallback)",
+    preserve_mode = false,
   },
   {
     feature = "shift_selection",
@@ -278,6 +308,7 @@ M.registry = {
     lhs = "<S-Left>",
     rhs = "<Esc>v<Left>",
     desc = "gui-keymap: Select left",
+    preserve_mode = false,
   },
   {
     feature = "shift_selection",
@@ -286,6 +317,7 @@ M.registry = {
     lhs = "<kL>",
     rhs = "<Esc>v<Left>",
     desc = "gui-keymap: Select left (terminal fallback)",
+    preserve_mode = false,
   },
   {
     feature = "shift_selection",
@@ -294,6 +326,7 @@ M.registry = {
     lhs = "<S-Right>",
     rhs = "<Esc>v<Right>",
     desc = "gui-keymap: Select right",
+    preserve_mode = false,
   },
   {
     feature = "shift_selection",
@@ -302,6 +335,7 @@ M.registry = {
     lhs = "<kR>",
     rhs = "<Esc>v<Right>",
     desc = "gui-keymap: Select right (terminal fallback)",
+    preserve_mode = false,
   },
   {
     feature = "shift_selection",
@@ -310,6 +344,7 @@ M.registry = {
     lhs = "<S-Up>",
     rhs = "<Esc>v<Up>",
     desc = "gui-keymap: Select up",
+    preserve_mode = false,
   },
   {
     feature = "shift_selection",
@@ -318,6 +353,7 @@ M.registry = {
     lhs = "<kU>",
     rhs = "<Esc>v<Up>",
     desc = "gui-keymap: Select up (terminal fallback)",
+    preserve_mode = false,
   },
   {
     feature = "shift_selection",
@@ -326,6 +362,7 @@ M.registry = {
     lhs = "<S-Down>",
     rhs = "<Esc>v<Down>",
     desc = "gui-keymap: Select down",
+    preserve_mode = false,
   },
 
   {
@@ -335,6 +372,7 @@ M.registry = {
     lhs = "<kD>",
     rhs = "<Esc>v<Down>",
     desc = "gui-keymap: Select down (terminal fallback)",
+    preserve_mode = false,
   },
   {
     feature = "word_delete",
@@ -344,6 +382,7 @@ M.registry = {
     rhs = "db",
     desc = "gui-keymap: Delete previous word",
     hint_key = "delete_prev_word",
+    preserve_mode = true,
   },
   {
     feature = "word_delete",
@@ -353,6 +392,7 @@ M.registry = {
     rhs = "dw",
     desc = "gui-keymap: Delete next word",
     hint_key = "delete_next_word",
+    preserve_mode = true,
   },
   {
     feature = "word_delete",
@@ -362,6 +402,7 @@ M.registry = {
     rhs = "<C-o>db",
     desc = "gui-keymap: Delete previous word",
     hint_key = "delete_prev_word",
+    preserve_mode = true,
   },
   {
     feature = "word_delete",
@@ -371,13 +412,44 @@ M.registry = {
     rhs = "<C-o>dw",
     desc = "gui-keymap: Delete next word",
     hint_key = "delete_next_word",
+    preserve_mode = true,
   },
+}
+
+M.explain = {
+  ["<C-c>"] = { gui = '"+y / "+yy', vim = "y / yy" },
+  ["<C-v>"] = { gui = '"+p', vim = "p" },
+  ["<C-x>"] = { gui = '"+d', vim = "d" },
+  ["<C-a>"] = { gui = "ggVG", vim = "ggVG" },
+  ["<C-z>"] = { gui = "u", vim = "u" },
+  ["<C-y>"] = { gui = "<C-r>", vim = "<C-r>" },
+  ["<C-BS>"] = { gui = "db", vim = "db" },
+  ["<C-Del>"] = { gui = "dw", vim = "dw" },
 }
 
 ---@param opts GuiKeymapOptions
 ---@param item GuiKeymapDefinition
 ---@return boolean
 local function item_enabled(opts, item)
+  if item.feature == "clipboard" then
+    if type(opts.clipboard) == "table" then
+      if item.toggle then
+        return opts.clipboard[item.toggle] == true
+      end
+      return true
+    end
+
+    if opts.clipboard ~= true then
+      return false
+    end
+
+    if item.toggle and opts[item.toggle] ~= nil then
+      return opts[item.toggle] == true
+    end
+
+    return true
+  end
+
   if opts[item.feature] ~= true then
     return false
   end
@@ -405,9 +477,14 @@ end
 
 ---@param rhs string|function
 ---@param opts GuiKeymapOptions
+---@param item GuiKeymapDefinition
 ---@return string|function
-local function with_mode_restore(rhs, opts)
+local function with_mode_restore(rhs, opts, item)
   if not opts.preserve_mode then
+    return rhs
+  end
+
+  if item.preserve_mode == false then
     return rhs
   end
 
@@ -437,7 +514,7 @@ end
 local function apply_main_registry(opts)
   for _, item in ipairs(M.registry) do
     if item_enabled(opts, item) then
-      local rhs = with_mode_restore(item.rhs, opts)
+      local rhs = with_mode_restore(item.rhs, opts, item)
       rhs = hints.wrap(item.mode, rhs, item.hint_key)
       utils.safe_map(
         item.mode,
@@ -455,7 +532,7 @@ end
 
 ---@param opts GuiKeymapOptions
 local function apply_yanky_registry(opts)
-  local has_yanky = pcall(require, "yanky")
+  local has_yanky = package.loaded["yanky"] ~= nil
   utils.set_yanky_status(has_yanky, opts.yanky_integration == true)
 
   if opts.yanky_integration ~= true then
@@ -504,6 +581,12 @@ function M.apply(opts)
   apply_main_registry(opts)
   apply_yanky_registry(opts)
   register_with_which_key(opts)
+end
+
+---@param key string
+---@return table|nil
+function M.explain_key(key)
+  return M.explain[key]
 end
 
 return M

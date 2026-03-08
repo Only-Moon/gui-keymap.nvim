@@ -1,22 +1,19 @@
-*gui-keymap.txt*     For Neovim >= 0.8.0     Last change: 2026 March 08
+*gui-keymap.txt*     For Neovim >= 0.8.0     Last change: 2026 March 09
 
 ==============================================================================
 Table of Contents                                         *gui-keymap-contents*
 
 1. gui-keymap.nvim                                            |gui-keymap.nvim|
 2. Configuration                                         |gui-keymap-config|
-3. Keymaps                                               |gui-keymap-keymaps|
-4. Commands                                             |gui-keymap-commands|
-5. Demo                                                     |gui-keymap-demo|
+3. Commands                                             |gui-keymap-commands|
 
 ==============================================================================
 1. gui-keymap.nvim                                               *gui-keymap.nvim*
 
-`gui-keymap.nvim` provides GUI-style shortcuts for users moving from editors
-like VSCode, Sublime, and JetBrains IDEs.
+`gui-keymap.nvim` provides GUI-style shortcuts and adaptive hints for users
+transitioning from GUI editors to Vim workflows.
 
-It includes safe keymap registration, optional adaptive hints, optional Yanky
-status integration, and diagnostics.
+Runtime state is centralized in `lua/gui-keymap/state.lua`.
 
 ==============================================================================
 2. Configuration                                            *gui-keymap-config*
@@ -24,7 +21,11 @@ status integration, and diagnostics.
 >
     require("gui-keymap").setup({
       undo_redo = true,
-      clipboard = true,
+      clipboard = {
+        copy = true,
+        paste = true,
+        cut = true,
+      },
       select_all = true,
       delete_selection = true,
       shift_selection = true,
@@ -40,60 +41,21 @@ status integration, and diagnostics.
     })
 <
 
-Use `hint_repeat = -1` to always show hints.
-
-Legacy per-shortcut toggles are also accepted:
-`copy`, `paste`, `cut`, `undo`, `redo`.
+`hint_repeat = -1` means always show hints.
 
 ==============================================================================
-3. Keymaps                                                    *gui-keymap-keymaps*
+3. Commands                                                 *gui-keymap-commands*
 
-UNDO/REDO ~
-- `<C-z>` (normal) -> `u`
-- `<C-y>` (normal) -> `<C-r>`
-- `<C-z>` (insert) -> `<C-o>u`
-- `<C-y>` (insert) -> `<C-o><C-r>`
-
-CLIPBOARD ~
-- `<C-c>` (visual) -> `"+y`
-- `<C-c>` (normal) -> `"+yy`
-- `<C-x>` (visual) -> `"+d`
-- `<C-v>` (normal/insert) -> `"+p`
-
-SELECT ALL ~
-- `<C-a>` (normal) -> `ggVG`
-- `<C-a>` (insert) -> `<Esc>ggVG`
-
-DELETE SELECTION ~
-- `<BS>` (visual) -> `"_d`
-- `<Del>` (visual) -> `"_d`
-
-SHIFT SELECTION ~
-- Normal: `<S-Left>`, `<S-Right>`, `<S-Up>`, `<S-Down>`
-- Visual: `<S-Left>`, `<S-Right>`, `<S-Up>`, `<S-Down>`
-- Insert: `<S-Left>`, `<S-Right>`, `<S-Up>`, `<S-Down>`
-
-WORD DELETE ~
-- `<C-BS>` (normal) -> `db`
-- `<C-Del>` (normal) -> `dw`
-- `<C-BS>` (insert) -> `<C-o>db`
-- `<C-Del>` (insert) -> `<C-o>dw`
-
-==============================================================================
-4. Commands                                                 *gui-keymap-commands*
-
-- `:GuiKeymapInfo` - show active maps, conflicts, integration state
-- `:GuiKeymapHintReset` - reset hint counters
-- `:GuiKeymapRefresh` - re-apply gui-keymap mappings
-- `:GuiKeymapDemo` - open a safe demo scratch buffer
-- `:GuiKeymapShowcase` - open an expanded demo scratch buffer
-- `:checkhealth gui-keymap` - run plugin health checks
-
-==============================================================================
-5. Demo                                                           *gui-keymap-demo*
-
-Use `:GuiKeymapDemo` to open a temporary scratch buffer and test shortcuts
-without affecting your files.
+- `:GuiKeymapDemo`
+- `:GuiKeymapShowcase`
+- `:GuiKeymapInfo`
+- `:GuiKeymapEnable`
+- `:GuiKeymapDisable`
+- `:GuiKeymapList`
+- `:GuiKeymapExplain <key>`
+- `:GuiKeymapRefresh`
+- `:GuiKeymapHintReset`
+- `:checkhealth gui-keymap`
 
 ==============================================================================
 vim:tw=78:ts=8:noet:ft=help:norl:
