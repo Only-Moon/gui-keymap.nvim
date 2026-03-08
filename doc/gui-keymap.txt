@@ -34,9 +34,9 @@ status integration, and diagnostics.
       hint_repeat = 3,
       which_key_integration = true,
       enforce_on_startup = true,
-      force_priority = false,
+      force_priority = true,
       show_welcome = false,
-      preserve_mode = false,
+      preserve_mode = true,
     })
 <
 

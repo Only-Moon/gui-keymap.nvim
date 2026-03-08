@@ -63,13 +63,30 @@ require("gui-keymap").setup({
   hint_repeat = 3, -- set -1 to always show hints
   which_key_integration = true,
   enforce_on_startup = true,
-  force_priority = false, -- set true to force-override existing mappings
+  force_priority = true, -- registers keymaps on top of all plugins
   show_welcome = false, -- set true to show onboarding once per plugin version
-  preserve_mode = false, -- return to original mode after mapped action
+  preserve_mode = true, -- return to the current mode after using keymap
 })
 ```
 
 Legacy toggles are still supported: `copy`, `paste`, `cut`, `undo`, `redo`.
+
+Option reference:
+
+- `undo_redo`: enable/disable `<C-z>` and `<C-y>` mappings.
+- `clipboard`: enable/disable copy/cut/paste GUI mappings.
+- `select_all`: enable/disable `<C-a>` select-all mappings.
+- `delete_selection`: enable/disable visual delete on `<BS>`/`<Del>`.
+- `shift_selection`: enable/disable Shift+Arrow selection mappings.
+- `word_delete`: enable/disable `<C-BS>`/`<C-Del>` word delete mappings.
+- `yanky_integration`: detect `yanky.nvim` and report status in info/health.
+- `hint_enabled`: show learning hints via `vim.notify`.
+- `hint_repeat`: number of times to show each hint (`-1` means always).
+- `which_key_integration`: register active mappings with `which-key` when installed.
+- `enforce_on_startup`: re-apply mappings during startup/lazy events.
+- `force_priority`: registers keymaps on top of all plugins.
+- `show_welcome`: show onboarding message (once per plugin version when enabled).
+- `preserve_mode`: return to the current mode after using keymap.
 
 ## GUI to Vim Comparison
 
