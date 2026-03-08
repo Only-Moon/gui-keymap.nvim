@@ -49,8 +49,8 @@ function M.validate(opts)
     table.insert(errors, "hint_enabled must be boolean")
   end
 
-  if type(opts.hint_repeat) ~= "number" or opts.hint_repeat < 0 then
-    table.insert(errors, "hint_repeat must be a non-negative number")
+  if type(opts.hint_repeat) ~= "number" or (opts.hint_repeat < 0 and opts.hint_repeat ~= -1) then
+    table.insert(errors, "hint_repeat must be -1 (always) or a non-negative number")
   end
 
   return errors

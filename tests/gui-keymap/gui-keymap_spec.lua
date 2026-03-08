@@ -1,5 +1,6 @@
 local plugin = require("gui-keymap")
 local utils = require("gui-keymap.utils")
+local hints = require("gui-keymap.hints")
 
 local function map_present(mode, lhs)
   local mapping = vim.fn.maparg(lhs, mode, false, true)
@@ -9,6 +10,7 @@ end
 describe("gui-keymap setup", function()
   before_each(function()
     utils.clear_plugin_maps()
+    hints.reset()
   end)
 
   it("merges defaults", function()
@@ -41,5 +43,15 @@ describe("gui-keymap setup", function()
 
     local state = utils.get_state()
     assert.is_true(#state.conflicts > 0)
+  end)
+
+  it("supports unlimited hints when hint_repeat is -1", function()
+    plugin.setup({ hint_enabled = true, hint_repeat = -1 })
+
+    hints.show("copy")
+    hints.show("copy")
+    hints.show("copy")
+
+    assert.are.same(3, hints.counts.copy)
   end)
 end)

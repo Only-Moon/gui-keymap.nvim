@@ -2,6 +2,7 @@ local config = require("gui-keymap.config")
 local hints = require("gui-keymap.hints")
 local keymaps = require("gui-keymap.keymaps")
 local info = require("gui-keymap.info")
+local utils = require("gui-keymap.utils")
 
 local M = {}
 
@@ -18,8 +19,8 @@ function M.setup(user_opts)
     vim.notify("gui-keymap: invalid configuration: " .. table.concat(errors, ", "), vim.log.levels.WARN)
   end
 
-  hints.setup(M.options)
   keymaps.apply(M.options)
+  hints.setup(M.options, utils.get_state().active_maps)
 
   return M.options
 end
