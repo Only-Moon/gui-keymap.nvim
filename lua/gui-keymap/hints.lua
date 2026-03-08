@@ -1,14 +1,14 @@
 local M = {}
 
 local messages = {
-  copy = { full = "Tip: Vim copy command is 'y'", short = "Tip: Try using 'y'" },
-  paste = { full = "Tip: Vim paste command is 'p'", short = "Tip: Try using 'p'" },
-  cut = { full = "Tip: Vim delete command is 'd'", short = "Tip: Try using 'd'" },
-  select_all = { full = "Tip: Vim visual selection starts with 'v'", short = "Tip: Try using 'v'" },
-  undo = { full = "Tip: Vim undo command is 'u'", short = "Tip: Try using 'u'" },
-  redo = { full = "Tip: Vim redo command is '<C-r>'", short = "Tip: Try using '<C-r>'" },
-  delete_prev_word = { full = "Tip: Vim previous-word delete is 'db'", short = "Tip: Try using 'db'" },
-  delete_next_word = { full = "Tip: Vim next-word delete is 'dw'", short = "Tip: Try using 'dw'" },
+  copy = { full = "Vim: y", short = "Try: y" },
+  paste = { full = "Vim: p", short = "Try: p" },
+  cut = { full = "Vim: d", short = "Try: d" },
+  select_all = { full = "Vim: ggVG", short = "Try: ggVG" },
+  undo = { full = "Vim: u", short = "Try: u" },
+  redo = { full = "Vim: <C-r>", short = "Try: <C-r>" },
+  delete_prev_word = { full = "Vim: db", short = "Try: db" },
+  delete_next_word = { full = "Vim: dw", short = "Try: dw" },
 }
 
 M.enabled = true

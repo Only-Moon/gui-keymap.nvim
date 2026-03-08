@@ -16,7 +16,7 @@ Users moving from VSCode, Sublime, or JetBrains often hit friction on day one be
 - Optional adaptive Vim hints (`vim.notify`) with per-session counters only
 - First-run session welcome message with demo prompt
 - Safe-map conflict tracking + `:checkhealth gui-keymap`
-- `:GuiKeymapInfo`, `:GuiKeymapRefresh`, `:GuiKeymapHintReset`, `:GuiKeymapDemo`
+- `:GuiKeymapInfo`, `:GuiKeymapRefresh`, `:GuiKeymapHintReset`, `:GuiKeymapDemo`, `:GuiKeymapShowcase`
 - Optional `which-key.nvim` registration (no dependency)
 - Optional `yanky.nvim` status integration (does not override yanky mappings)
 
@@ -63,7 +63,7 @@ require("gui-keymap").setup({
   hint_repeat = 3, -- set -1 to always show hints
   which_key_integration = true,
   enforce_on_startup = true,
-  force_priority = true,
+  force_priority = false, -- set true to force-override existing mappings
   show_welcome = true,
   preserve_mode = false, -- return to original mode after mapped action
 })
@@ -128,6 +128,7 @@ This opens a temporary scratch buffer where you can safely test mappings without
 - `:GuiKeymapRefresh`
 - `:GuiKeymapHintReset`
 - `:GuiKeymapDemo`
+- `:GuiKeymapShowcase`
 - `:checkhealth gui-keymap`
 
 ## Architecture

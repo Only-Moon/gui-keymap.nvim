@@ -9,6 +9,7 @@ local M = {}
 M.options = config.merge()
 M._enforce_group = nil
 M._welcome_shown = false
+M._setup_done = false
 
 function M.apply()
   hints.setup(M.options)
@@ -59,6 +60,10 @@ end
 ---@param user_opts GuiKeymapOptions|nil
 ---@return GuiKeymapOptions
 function M.setup(user_opts)
+  if M._setup_done and user_opts == nil then
+    return M.options
+  end
+
   M.options = config.merge(user_opts)
 
   local errors = config.validate(M.options)
@@ -70,6 +75,7 @@ function M.setup(user_opts)
   M.setup_enforcement_autocmds()
   schedule_enforcement_passes()
   maybe_show_welcome()
+  M._setup_done = true
 
   return M.options
 end

@@ -27,7 +27,7 @@ local demo_lines = {
   "Press :q to close the demo.",
 }
 
-function M.open()
+local function open_with_lines(lines)
   vim.cmd("enew")
 
   local buf = vim.api.nvim_get_current_buf()
@@ -37,8 +37,18 @@ function M.open()
   vim.bo[buf].modifiable = true
   vim.bo[buf].filetype = "gui-keymap-demo"
 
-  vim.api.nvim_buf_set_lines(buf, 0, -1, false, demo_lines)
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
   vim.api.nvim_win_set_cursor(0, { 1, 0 })
+end
+
+function M.open()
+  open_with_lines(demo_lines)
+end
+
+function M.showcase()
+  local lines = vim.deepcopy(demo_lines)
+  table.insert(lines, 2, "Interactive showcase: try keys and compare with :GuiKeymapInfo.")
+  open_with_lines(lines)
 end
 
 return M

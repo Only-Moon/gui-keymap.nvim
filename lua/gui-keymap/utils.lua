@@ -32,6 +32,7 @@ M.state = {
 }
 
 local applied_index = {}
+local notified_conflicts = {}
 
 ---@param mode string|string[]
 ---@return string[]
@@ -81,6 +82,7 @@ function M.reset_state()
   M.state.yanky_enabled = false
   M.state.which_key_available = false
   applied_index = {}
+  notified_conflicts = {}
 end
 
 function M.clear_plugin_maps()
@@ -107,6 +109,17 @@ function M.record_conflict(mode, lhs, requested_desc, existing)
     existing_desc = existing.desc or "",
     existing_rhs = existing.rhs or "",
   })
+
+  local key = mode .. "::" .. lhs
+  if not notified_conflicts[key] then
+    notified_conflicts[key] = true
+    vim.schedule(function()
+      vim.notify(
+        "[gui-keymap.nvim] keymap conflict: " .. lhs .. " already mapped in mode " .. mode,
+        vim.log.levels.WARN
+      )
+    end)
+  end
 end
 
 ---@param mapping GuiKeymapActive
@@ -166,6 +179,11 @@ end
 ---@return GuiKeymapState
 function M.get_state()
   return M.state
+end
+
+---@return GuiKeymapConflict[]
+function M.get_conflicts()
+  return M.state.conflicts
 end
 
 return M

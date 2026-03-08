@@ -53,10 +53,11 @@ function M.check()
   end
 
   local state = utils.get_state()
-  if #state.conflicts == 0 then
+  local conflicts = utils.get_conflicts()
+  if #conflicts == 0 then
     ok("no keymap conflicts detected")
   else
-    for _, conflict in ipairs(state.conflicts) do
+    for _, conflict in ipairs(conflicts) do
       warn(string.format("keymap conflict for %s in mode %s", conflict.lhs, conflict.mode))
     end
   end

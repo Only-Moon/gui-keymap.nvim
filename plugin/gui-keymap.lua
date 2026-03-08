@@ -22,4 +22,10 @@ vim.api.nvim_create_user_command("GuiKeymapDemo", function()
   require("gui-keymap.demo").open()
 end, { desc = "Open gui-keymap demo buffer" })
 
-plugin.setup()
+vim.api.nvim_create_user_command("GuiKeymapShowcase", function()
+  require("gui-keymap.demo").showcase()
+end, { desc = "Open gui-keymap showcase buffer" })
+
+vim.schedule(function()
+  plugin.setup()
+end)

@@ -34,7 +34,7 @@ status integration, and diagnostics.
       hint_repeat = 3,
       which_key_integration = true,
       enforce_on_startup = true,
-      force_priority = true,
+      force_priority = false,
       show_welcome = true,
       preserve_mode = false,
     })
@@ -86,6 +86,7 @@ WORD DELETE ~
 - `:GuiKeymapHintReset` - reset hint counters
 - `:GuiKeymapRefresh` - re-apply gui-keymap mappings
 - `:GuiKeymapDemo` - open a safe demo scratch buffer
+- `:GuiKeymapShowcase` - open an expanded demo scratch buffer
 - `:checkhealth gui-keymap` - run plugin health checks
 
 ==============================================================================

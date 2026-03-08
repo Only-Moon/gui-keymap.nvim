@@ -27,8 +27,9 @@ local function build_lines(opts)
   end
 
   table.insert(lines, "")
-  table.insert(lines, "Conflicts: " .. tostring(#state.conflicts))
-  for _, conflict in ipairs(state.conflicts) do
+  local conflicts = utils.get_conflicts()
+  table.insert(lines, "Conflicts: " .. tostring(#conflicts))
+  for _, conflict in ipairs(conflicts) do
     table.insert(
       lines,
       string.format(

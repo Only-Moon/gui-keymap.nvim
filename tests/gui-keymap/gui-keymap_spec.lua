@@ -26,7 +26,7 @@ describe("gui-keymap setup", function()
     assert.are.same(true, opts.hint_enabled)
     assert.are.same(3, opts.hint_repeat)
     assert.are.same(true, opts.enforce_on_startup)
-    assert.are.same(true, opts.force_priority)
+    assert.are.same(false, opts.force_priority)
     assert.are.same(false, opts.preserve_mode)
   end)
 
@@ -68,6 +68,14 @@ describe("gui-keymap setup", function()
     assert.is_true(#state.conflicts > 0)
   end)
 
+  it("does not override user mappings by default", function()
+    vim.keymap.set("n", "<C-c>", "yy", { desc = "user map" })
+    plugin.setup({ clipboard = true, show_welcome = false })
+
+    local state = utils.get_state()
+    assert.is_true(#state.conflicts > 0)
+  end)
+
   it("supports unlimited hints when hint_repeat is -1", function()
     plugin.setup({ hint_enabled = true, hint_repeat = -1, show_welcome = false })
 
@@ -100,5 +108,16 @@ describe("gui-keymap demo", function()
     assert.are.same("gui-keymap.nvim demo", lines[1])
     assert.is_true(vim.tbl_contains(lines, "Ctrl+Backspace -> Delete previous word"))
     assert.is_true(vim.tbl_contains(lines, "Ctrl+Delete -> Delete next word"))
+  end)
+
+  it("opens showcase scratch demo buffer", function()
+    require("gui-keymap.demo").showcase()
+
+    local buf = vim.api.nvim_get_current_buf()
+    assert.are.same("nofile", vim.bo[buf].buftype)
+    assert.are.same("gui-keymap-demo", vim.bo[buf].filetype)
+
+    local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+    assert.is_true(vim.tbl_contains(lines, "Interactive showcase: try keys and compare with :GuiKeymapInfo."))
   end)
 end)
