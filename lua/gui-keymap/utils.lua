@@ -39,7 +39,6 @@ local function normalize_modes(mode)
   if type(mode) == "table" then
     return mode
   end
-
   return { mode }
 end
 
@@ -55,18 +54,8 @@ local function is_builtin_default(existing)
   if type(existing) ~= "table" or next(existing) == nil then
     return false
   end
-
   local desc = existing.desc or ""
   return desc == "Increment" or desc == "Decrement"
-end
-
----@param feature string
----@param mode string
----@param lhs string
----@return boolean
-local function is_ignored_conflict(feature, mode, lhs)
-  -- LazyVim commonly uses these for window navigation.
-  return feature == "shift_selection" and mode == "n" and (lhs == "<S-Left>" or lhs == "<S-Right>")
 end
 
 ---@param mode string
@@ -98,7 +87,6 @@ function M.clear_plugin_maps()
   for _, mapping in ipairs(M.state.active_maps) do
     pcall(vim.keymap.del, mapping.mode, mapping.lhs)
   end
-
   M.reset_state()
 end
 
@@ -127,7 +115,6 @@ function M.record_active(mapping)
   if applied_index[key] then
     return
   end
-
   applied_index[key] = true
   table.insert(M.state.active_maps, mapping)
 end
@@ -137,8 +124,9 @@ end
 ---@param rhs string|function
 ---@param opts table|nil
 ---@param feature string
+---@param force boolean|nil
 ---@return boolean
-function M.safe_map(mode, lhs, rhs, opts, feature)
+function M.safe_map(mode, lhs, rhs, opts, feature, force)
   local modes = normalize_modes(mode)
   local final_opts = vim.tbl_extend("force", { noremap = true, silent = true }, opts or {})
   local desc = final_opts.desc or ("gui-keymap: " .. lhs)
@@ -147,10 +135,8 @@ function M.safe_map(mode, lhs, rhs, opts, feature)
     local existing = M.inspect_mapping(current_mode, lhs)
     local has_existing = type(existing) == "table" and next(existing) ~= nil
 
-    if has_existing and not is_builtin_default(existing) then
-      if not is_ignored_conflict(feature, current_mode, lhs) then
-        M.record_conflict(current_mode, lhs, desc, existing)
-      end
+    if has_existing and not is_builtin_default(existing) and not force then
+      M.record_conflict(current_mode, lhs, desc, existing)
     else
       vim.keymap.set(current_mode, lhs, rhs, final_opts)
       M.record_active({

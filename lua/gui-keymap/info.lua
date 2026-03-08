@@ -29,13 +29,28 @@ local function build_lines(opts)
   table.insert(lines, "")
   table.insert(lines, "Conflicts: " .. tostring(#state.conflicts))
   for _, conflict in ipairs(state.conflicts) do
-    table.insert(lines, string.format("- [%s] %s (%s)", conflict.mode, conflict.lhs, conflict.existing_desc ~= "" and conflict.existing_desc or "preexisting map"))
+    table.insert(
+      lines,
+      string.format(
+        "- [%s] %s (%s)",
+        conflict.mode,
+        conflict.lhs,
+        conflict.existing_desc ~= "" and conflict.existing_desc or "preexisting map"
+      )
+    )
   end
 
   table.insert(lines, "")
-  table.insert(lines, "Yanky integration: " .. (state.yanky_enabled and "enabled" or (state.yanky_available and "disabled by config" or "not installed")))
+  table.insert(
+    lines,
+    "Yanky integration: "
+      .. (state.yanky_enabled and "enabled" or (state.yanky_available and "disabled by config" or "not installed"))
+  )
   table.insert(lines, "which-key integration: " .. (state.which_key_available and "available" or "not installed"))
-  table.insert(lines, "Hints: " .. ((opts.hint_enabled and "enabled") or "disabled") .. string.format(" (repeat: %d)", opts.hint_repeat))
+  table.insert(
+    lines,
+    "Hints: " .. ((opts.hint_enabled and "enabled") or "disabled") .. string.format(" (repeat: %d)", opts.hint_repeat)
+  )
 
   return lines
 end

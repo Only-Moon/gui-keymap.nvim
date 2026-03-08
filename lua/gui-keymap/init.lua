@@ -2,12 +2,59 @@ local config = require("gui-keymap.config")
 local hints = require("gui-keymap.hints")
 local keymaps = require("gui-keymap.keymaps")
 local info = require("gui-keymap.info")
-local utils = require("gui-keymap.utils")
 
 local M = {}
 
 ---@type GuiKeymapOptions
 M.options = config.merge()
+M._enforce_group = nil
+M._welcome_shown = false
+
+function M.apply()
+  hints.setup(M.options)
+  keymaps.apply(M.options)
+end
+
+local function schedule_enforcement_passes()
+  if not M.options.enforce_on_startup then
+    return
+  end
+
+  for _, delay in ipairs({ 30, 180, 600 }) do
+    vim.defer_fn(function()
+      M.apply()
+    end, delay)
+  end
+end
+
+function M.setup_enforcement_autocmds()
+  if M._enforce_group then
+    return
+  end
+
+  M._enforce_group = vim.api.nvim_create_augroup("GuiKeymapEnforce", { clear = true })
+
+  vim.api.nvim_create_autocmd("User", {
+    group = M._enforce_group,
+    pattern = { "VeryLazy", "LazyDone" },
+    callback = function()
+      M.apply()
+    end,
+  })
+end
+
+local function maybe_show_welcome()
+  if M._welcome_shown or not M.options.show_welcome then
+    return
+  end
+
+  M._welcome_shown = true
+  vim.notify(
+    "Welcome to gui-keymap.nvim\n\nRun :GuiKeymapDemo to test GUI shortcuts safely.",
+    vim.log.levels.INFO,
+    { title = "gui-keymap" }
+  )
+end
 
 ---@param user_opts GuiKeymapOptions|nil
 ---@return GuiKeymapOptions
@@ -19,8 +66,10 @@ function M.setup(user_opts)
     vim.notify("gui-keymap: invalid configuration: " .. table.concat(errors, ", "), vim.log.levels.WARN)
   end
 
-  keymaps.apply(M.options)
-  hints.setup(M.options, utils.get_state().active_maps)
+  M.apply()
+  M.setup_enforcement_autocmds()
+  schedule_enforcement_passes()
+  maybe_show_welcome()
 
   return M.options
 end
@@ -31,6 +80,10 @@ end
 
 function M.reset_hints()
   hints.reset()
+end
+
+function M.refresh()
+  M.apply()
 end
 
 return M

@@ -7,6 +7,7 @@ Table of Contents                                         *gui-keymap-contents*
 2. Configuration                                         |gui-keymap-config|
 3. Keymaps                                               |gui-keymap-keymaps|
 4. Commands                                             |gui-keymap-commands|
+5. Demo                                                     |gui-keymap-demo|
 
 ==============================================================================
 1. gui-keymap.nvim                                               *gui-keymap.nvim*
@@ -14,8 +15,8 @@ Table of Contents                                         *gui-keymap-contents*
 `gui-keymap.nvim` provides GUI-style shortcuts for users moving from editors
 like VSCode, Sublime, and JetBrains IDEs.
 
-It includes safe keymap registration, optional hints, optional Yanky
-integration, and diagnostics.
+It includes safe keymap registration, optional adaptive hints, optional Yanky
+status integration, and diagnostics.
 
 ==============================================================================
 2. Configuration                                            *gui-keymap-config*
@@ -27,12 +28,19 @@ integration, and diagnostics.
       select_all = true,
       delete_selection = true,
       shift_selection = true,
+      word_delete = true,
       yanky_integration = true,
       hint_enabled = true,
       hint_repeat = 3,
       which_key_integration = true,
+      enforce_on_startup = true,
+      force_priority = true,
+      show_welcome = true,
+      preserve_mode = false,
     })
 <
+
+Use `hint_repeat = -1` to always show hints.
 
 Legacy per-shortcut toggles are also accepted:
 `copy`, `paste`, `cut`, `undo`, `redo`.
@@ -65,12 +73,26 @@ SHIFT SELECTION ~
 - Visual: `<S-Left>`, `<S-Right>`, `<S-Up>`, `<S-Down>`
 - Insert: `<S-Left>`, `<S-Right>`, `<S-Up>`, `<S-Down>`
 
+WORD DELETE ~
+- `<C-BS>` (normal) -> `db`
+- `<C-Del>` (normal) -> `dw`
+- `<C-BS>` (insert) -> `<C-o>db`
+- `<C-Del>` (insert) -> `<C-o>dw`
+
 ==============================================================================
 4. Commands                                                 *gui-keymap-commands*
 
 - `:GuiKeymapInfo` - show active maps, conflicts, integration state
 - `:GuiKeymapHintReset` - reset hint counters
+- `:GuiKeymapRefresh` - re-apply gui-keymap mappings
+- `:GuiKeymapDemo` - open a safe demo scratch buffer
 - `:checkhealth gui-keymap` - run plugin health checks
+
+==============================================================================
+5. Demo                                                           *gui-keymap-demo*
+
+Use `:GuiKeymapDemo` to open a temporary scratch buffer and test shortcuts
+without affecting your files.
 
 ==============================================================================
 vim:tw=78:ts=8:noet:ft=help:norl:
