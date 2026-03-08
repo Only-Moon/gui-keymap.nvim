@@ -70,6 +70,12 @@ function M.check()
   else
     info("yanky.nvim not installed (optional)")
   end
+
+  if state.which_key_available then
+    ok("which-key.nvim available")
+  else
+    info("which-key.nvim not installed (optional)")
+  end
 end
 
 return M

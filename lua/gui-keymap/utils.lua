@@ -60,6 +60,15 @@ local function is_builtin_default(existing)
   return desc == "Increment" or desc == "Decrement"
 end
 
+---@param feature string
+---@param mode string
+---@param lhs string
+---@return boolean
+local function is_ignored_conflict(feature, mode, lhs)
+  -- LazyVim commonly uses these for window navigation.
+  return feature == "shift_selection" and mode == "n" and (lhs == "<S-Left>" or lhs == "<S-Right>")
+end
+
 ---@param mode string
 ---@param lhs string
 ---@return table
@@ -139,7 +148,9 @@ function M.safe_map(mode, lhs, rhs, opts, feature)
     local has_existing = type(existing) == "table" and next(existing) ~= nil
 
     if has_existing and not is_builtin_default(existing) then
-      M.record_conflict(current_mode, lhs, desc, existing)
+      if not is_ignored_conflict(feature, current_mode, lhs) then
+        M.record_conflict(current_mode, lhs, desc, existing)
+      end
     else
       vim.keymap.set(current_mode, lhs, rhs, final_opts)
       M.record_active({
