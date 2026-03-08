@@ -49,6 +49,17 @@ local function map_key(mapping)
   return mapping.mode .. "::" .. mapping.lhs
 end
 
+---@param existing table
+---@return boolean
+local function is_builtin_default(existing)
+  if type(existing) ~= "table" or next(existing) == nil then
+    return false
+  end
+
+  local desc = existing.desc or ""
+  return desc == "Increment" or desc == "Decrement"
+end
+
 ---@param mode string
 ---@param lhs string
 ---@return table
@@ -125,7 +136,9 @@ function M.safe_map(mode, lhs, rhs, opts, feature)
 
   for _, current_mode in ipairs(modes) do
     local existing = M.inspect_mapping(current_mode, lhs)
-    if type(existing) == "table" and next(existing) ~= nil then
+    local has_existing = type(existing) == "table" and next(existing) ~= nil
+
+    if has_existing and not is_builtin_default(existing) then
       M.record_conflict(current_mode, lhs, desc, existing)
     else
       vim.keymap.set(current_mode, lhs, rhs, final_opts)

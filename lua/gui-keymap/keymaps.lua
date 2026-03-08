@@ -45,19 +45,6 @@ M.registry = {
   { feature = "shift_selection", mode = "i", lhs = "<S-Down>", rhs = "<Esc>v<Down>", desc = "gui-keymap: Select down" },
 }
 
-local yanky_registry = {
-  { mode = "n", lhs = "]p", rhs = "<Plug>(YankyPutIndentAfterLinewise)", desc = "gui-keymap: Yanky ]p" },
-  { mode = "n", lhs = "[p", rhs = "<Plug>(YankyPutIndentBeforeLinewise)", desc = "gui-keymap: Yanky [p" },
-  { mode = "n", lhs = "]P", rhs = "<Plug>(YankyPutIndentAfterLinewise)", desc = "gui-keymap: Yanky ]P" },
-  { mode = "n", lhs = "[P", rhs = "<Plug>(YankyPutIndentBeforeLinewise)", desc = "gui-keymap: Yanky [P" },
-  { mode = "n", lhs = ">p", rhs = "<Plug>(YankyPutIndentAfterShiftRight)", desc = "gui-keymap: Yanky >p" },
-  { mode = "n", lhs = "<p", rhs = "<Plug>(YankyPutIndentAfterShiftLeft)", desc = "gui-keymap: Yanky <p" },
-  { mode = "n", lhs = ">P", rhs = "<Plug>(YankyPutIndentBeforeShiftRight)", desc = "gui-keymap: Yanky >P" },
-  { mode = "n", lhs = "<P", rhs = "<Plug>(YankyPutIndentBeforeShiftLeft)", desc = "gui-keymap: Yanky <P" },
-  { mode = "n", lhs = "=p", rhs = "<Plug>(YankyPutAfterFilter)", desc = "gui-keymap: Yanky =p" },
-  { mode = "n", lhs = "=P", rhs = "<Plug>(YankyPutBeforeFilter)", desc = "gui-keymap: Yanky =P" },
-}
-
 ---@param opts GuiKeymapOptions
 ---@param item GuiKeymapDefinition
 ---@return boolean
@@ -89,15 +76,9 @@ local function apply_yanky_registry(opts)
   local has_yanky = pcall(require, "yanky")
   utils.set_yanky_status(has_yanky, opts.yanky_integration == true)
 
-  if not has_yanky or opts.yanky_integration ~= true then
-    if opts.yanky_integration ~= true then
-      utils.mark_feature_disabled("yanky_integration")
-    end
-    return
-  end
-
-  for _, item in ipairs(yanky_registry) do
-    utils.safe_map(item.mode, item.lhs, item.rhs, { desc = item.desc, silent = true, noremap = true }, "yanky_integration")
+  -- Integration is informational-only; yanky keeps its own mappings.
+  if opts.yanky_integration ~= true then
+    utils.mark_feature_disabled("yanky_integration")
   end
 end
 
