@@ -29,8 +29,8 @@ local templates = {
       "Quick practice: try d next time.",
     },
     default = {
-      "Deleted text. Vim equivalent: d",
-      "You can use d for delete/cut behavior.",
+      "Cut/Delete action. Vim equivalent: d",
+      "You can use d for this action.",
       "Quick practice: try d next time.",
     },
   },

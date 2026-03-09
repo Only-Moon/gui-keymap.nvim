@@ -7,6 +7,7 @@ local M = {
   hint_last_ts = {},
   disabled_features = {},
   yanky_available = false,
+  yanky_loaded = false,
   yanky_enabled = false,
   which_key_available = false,
 }
@@ -28,6 +29,7 @@ function M.clear_runtime()
   M.hint_last_ts = {}
   M.disabled_features = {}
   M.yanky_available = false
+  M.yanky_loaded = false
   M.yanky_enabled = false
   M.which_key_available = false
   active_index = {}

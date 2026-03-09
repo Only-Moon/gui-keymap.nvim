@@ -42,11 +42,15 @@ local function build_lines(opts)
   end
 
   table.insert(lines, "")
-  table.insert(
-    lines,
-    "Yanky integration: "
-      .. (state.yanky_enabled and "enabled" or (state.yanky_available and "disabled by config" or "not installed"))
-  )
+  local yanky_status
+  if not state.yanky_available then
+    yanky_status = "not installed"
+  elseif state.yanky_enabled then
+    yanky_status = state.yanky_loaded and "enabled (loaded)" or "enabled (installed, lazy-not-loaded)"
+  else
+    yanky_status = state.yanky_loaded and "disabled by config (loaded)" or "disabled by config (installed)"
+  end
+  table.insert(lines, "Yanky integration: " .. yanky_status)
   table.insert(lines, "which-key integration: " .. (state.which_key_available and "available" or "not installed"))
   table.insert(
     lines,

@@ -64,9 +64,17 @@ function M.check()
 
   if state.yanky_available then
     if state.yanky_enabled then
-      ok("yanky.nvim available and integration enabled")
+      if state.yanky_loaded then
+        ok("yanky.nvim available, loaded, and integration enabled")
+      else
+        ok("yanky.nvim installed (lazy-not-loaded) and integration enabled")
+      end
     else
-      info("yanky.nvim available, but integration disabled by config")
+      if state.yanky_loaded then
+        info("yanky.nvim loaded, but integration disabled by config")
+      else
+        info("yanky.nvim installed (lazy-not-loaded), but integration disabled by config")
+      end
     end
   else
     info("yanky.nvim not installed (optional)")
