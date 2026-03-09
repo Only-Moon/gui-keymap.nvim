@@ -3,8 +3,34 @@ local utils = require("gui-keymap.utils")
 
 local M = {}
 
+local function termcodes(keys)
+  return vim.api.nvim_replace_termcodes(keys, true, false, true)
+end
+
+local function feed(keys)
+  vim.api.nvim_feedkeys(termcodes(keys), "m", false)
+end
+
 local function run_normal(keys)
   vim.cmd.normal({ args = { keys }, bang = true })
+end
+
+local function yanky_runtime_installed()
+  return #vim.api.nvim_get_runtime_file("lua/yanky.lua", false) > 0
+    or #vim.api.nvim_get_runtime_file("lua/yanky/init.lua", false) > 0
+end
+
+local function ensure_yanky_loaded()
+  if package.loaded["yanky"] ~= nil then
+    return true
+  end
+
+  if not yanky_runtime_installed() then
+    return false
+  end
+
+  pcall(require, "yanky")
+  return package.loaded["yanky"] ~= nil
 end
 
 local function sync_unnamed_from_plus()
@@ -15,22 +41,52 @@ local function sync_unnamed_from_plus()
   vim.fn.setreg('"', plus, vim.fn.getregtype("+"))
 end
 
+local function sync_plus_from_unnamed()
+  local unnamed = vim.fn.getreg('"')
+  if unnamed == "" then
+    return
+  end
+  local regtype = vim.fn.getregtype('"')
+  vim.fn.setreg("+", unnamed, regtype)
+  vim.fn.setreg("*", unnamed, regtype)
+end
+
 local function copy_selection()
+  if ensure_yanky_loaded() then
+    feed("<Plug>(YankyYank)")
+    sync_plus_from_unnamed()
+    return
+  end
   run_normal('"+y')
   sync_unnamed_from_plus()
 end
 
 local function copy_line()
+  if ensure_yanky_loaded() then
+    run_normal("yy")
+    sync_plus_from_unnamed()
+    return
+  end
   run_normal('"+yy')
   sync_unnamed_from_plus()
 end
 
 local function cut_selection()
+  if ensure_yanky_loaded() then
+    feed("<Plug>(YankyYank)")
+    run_normal([[gv"_d]])
+    sync_plus_from_unnamed()
+    return
+  end
   run_normal('"+d')
   sync_unnamed_from_plus()
 end
 
 local function paste_normal()
+  if ensure_yanky_loaded() then
+    feed("<Plug>(YankyPutAfter)")
+    return
+  end
   if vim.fn.getreg("+") ~= "" then
     run_normal('"+p')
     return
@@ -39,6 +95,10 @@ local function paste_normal()
 end
 
 local function paste_insert()
+  if ensure_yanky_loaded() then
+    feed("<Esc><Plug>(YankyPutAfter)a")
+    return
+  end
   local clip = vim.fn.getreg("+")
   if clip == "" then
     clip = vim.fn.getreg('"')
@@ -587,11 +647,7 @@ end
 ---@param opts GuiKeymapOptions
 local function apply_yanky_registry(opts)
   local loaded_yanky = package.loaded["yanky"] ~= nil
-  local has_yanky = loaded_yanky
-  if not has_yanky then
-    has_yanky = #vim.api.nvim_get_runtime_file("lua/yanky.lua", false) > 0
-      or #vim.api.nvim_get_runtime_file("lua/yanky/init.lua", false) > 0
-  end
+  local has_yanky = loaded_yanky or yanky_runtime_installed()
 
   utils.set_yanky_status(has_yanky, loaded_yanky, opts.yanky_integration == true)
 
