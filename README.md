@@ -1,26 +1,48 @@
 # gui-keymap.nvim
 
-Stop fighting muscle memory.
+Use familiar GUI shortcuts in Neovim while learning native Vim commands.
 
-`gui-keymap.nvim` provides GUI-style shortcuts for Neovim users transitioning from VSCode, JetBrains IDEs, or Sublime while gradually teaching native Vim commands.
+## Demo
+
+Run `:GuiKeymapDemo` to open a safe scratch buffer and test GUI-style shortcuts without touching your files.
+
+On first install/update, the plugin also shows a one-time welcome notification.
+
+## Why this plugin exists
+
+- GUI editors rely on shortcuts like `Ctrl+C`, `Ctrl+V`, and `Ctrl+Z`.
+- Vim uses native commands like `y`, `p`, and `u`.
+- `gui-keymap.nvim` bridges that gap for a smoother transition.
 
 ## Features
 
-- GUI keymaps: copy/paste/cut/select-all/undo/redo
-- Shift+Arrow GUI-style selection
-- Word delete shortcuts (`<C-BS>`, `<C-Del>`)
+- GUI-style shortcuts for copy, paste, cut, select all, undo, redo
+- Shift + Arrow selection behavior
+- GUI-style word deletion (`<C-BS>`, `<C-Del>`)
+- Context-aware adaptive Vim hints (session-only)
 - Safe keymap registration with conflict tracking
-- Adaptive, throttled hints (session-only)
-- Session onboarding (`VimEnter`) via `onboard.lua`
-- Demo + Showcase buffers
-- Runtime commands: enable/disable/list/explain
-- Health checks and diagnostics
-- Optional `which-key.nvim` and `yanky.nvim` integration
-- Central runtime state container (`state.lua`)
+- Demo and showcase buffers
+- Runtime enable / disable / refresh controls
+- `:GuiKeymapInfo` diagnostics and `:checkhealth gui-keymap`
+- Optional `which-key.nvim` integration
+- Optional `yanky.nvim` detection/integration status
+
+## GUI -> Vim Keymap Comparison
+
+| GUI Shortcut | Action | Vim Equivalent |
+|--------------|--------|----------------|
+| Ctrl+C | Copy | `y` / `yy` |
+| Ctrl+V | Paste | `p` |
+| Ctrl+X | Cut | `d` |
+| Ctrl+A | Select All | `ggVG` |
+| Ctrl+Z | Undo | `u` |
+| Ctrl+Y | Redo | `<C-r>` |
+| Ctrl+Backspace | Delete previous word | `db` |
+| Ctrl+Delete | Delete next word | `dw` |
 
 ## Installation
 
-### lazy.nvim / LazyVim
+### lazy.nvim
 
 ```lua
 {
@@ -28,6 +50,41 @@ Stop fighting muscle memory.
   opts = {},
 }
 ```
+
+### packer.nvim
+
+```lua
+use({
+  "Only-Moon/gui-keymap.nvim",
+  config = function()
+    require("gui-keymap").setup({})
+  end,
+})
+```
+
+### vim-plug
+
+```vim
+Plug 'Only-Moon/gui-keymap.nvim'
+```
+
+```lua
+require("gui-keymap").setup({})
+```
+
+### Native packages
+
+```sh
+git clone https://github.com/Only-Moon/gui-keymap.nvim \
+  ~/.local/share/nvim/site/pack/gui/start/gui-keymap.nvim
+```
+
+## Quick Start
+
+1. Install the plugin with your plugin manager.
+2. Start Neovim.
+3. Run `:GuiKeymapDemo`.
+4. Try the shortcuts in the demo buffer.
 
 ## Configuration
 
@@ -54,60 +111,44 @@ require("gui-keymap").setup({
 })
 ```
 
-### Option reference
-
-- `undo_redo`: toggle `<C-z>` / `<C-y>` mappings.
-- `clipboard.copy`: toggle copy mappings.
-- `clipboard.paste`: toggle paste mappings.
-- `clipboard.cut`: toggle cut mapping.
-- `select_all`: toggle `<C-a>` mappings.
-- `delete_selection`: toggle visual `<BS>`/`<Del>` delete mappings.
-- `shift_selection`: toggle Shift+Arrow mappings.
-- `word_delete`: toggle `<C-BS>` / `<C-Del>` mappings.
-- `yanky_integration`: enable optional yanky status/mappings handling.
-- `hint_enabled`: enable/disable hints.
-- `hint_repeat`: max hint count per shortcut (`-1` always).
-- `which_key_integration`: register active maps with which-key.
-- `enforce_on_startup`: re-apply mappings on lazy startup events.
-- `force_priority`: allow gui-keymap to override preexisting mappings.
-- `show_welcome`: show onboarding only on first install/update (tracked in `stdpath("state")`).
-- `preserve_mode`: return to previous mode after mapped action.
-
 ## Commands
 
-- `:GuiKeymapDemo`
-- `:GuiKeymapShowcase`
-- `:GuiKeymapInfo`
-- `:GuiKeymapEnable`
-- `:GuiKeymapDisable`
-- `:GuiKeymapList`
-- `:GuiKeymapExplain <key>`
-- `:GuiKeymapRefresh`
-- `:GuiKeymapHintReset`
-- `:checkhealth gui-keymap`
+| Command | Description |
+|--------|-------------|
+| `:GuiKeymapDemo` | Open safe demo buffer |
+| `:GuiKeymapShowcase` | Open demo showcase with recording tips |
+| `:GuiKeymapInfo` | Show plugin diagnostics summary |
+| `:GuiKeymapEnable` | Enable GUI mappings |
+| `:GuiKeymapDisable` | Disable GUI mappings |
+| `:GuiKeymapList` | List active mappings |
+| `:GuiKeymapExplain <key>` | Explain one mapped key |
+| `:GuiKeymapRefresh` | Re-apply mappings |
+| `:GuiKeymapHintReset` | Reset in-session hint counters |
 
-## Architecture
+## Health Check
 
-- `plugin/gui-keymap.lua`
-- `lua/gui-keymap/init.lua`
-- `lua/gui-keymap/config.lua`
-- `lua/gui-keymap/keymaps.lua`
-- `lua/gui-keymap/hints.lua`
-- `lua/gui-keymap/utils.lua`
-- `lua/gui-keymap/state.lua`
-- `lua/gui-keymap/demo.lua`
-- `lua/gui-keymap/onboard.lua`
-- `lua/gui-keymap/info.lua`
-- `lua/gui-keymap/health.lua`
+Run:
+
+`:checkhealth gui-keymap`
+
+It reports plugin load status, config validity, keymap conflicts, and optional integration status.
+
+## Who is this plugin for?
+
+- Developers transitioning from VSCode or other GUI editors
+- Vim/Neovim beginners
+- Users who want GUI shortcuts while learning Vim
+- Teams onboarding developers to Neovim
 
 ## Roadmap
 
 - Transition mode
 - GUI preset profiles (VSCode / JetBrains / Sublime)
-- Learning mode improvements
-- Context-aware advanced teaching
-- Adaptive learning engine
+- Advanced learning hints
+- Adaptive teaching system
+- Update changelog notification (planned for v2)
 
-## License
+## Philosophy
 
-MIT
+Vim is powerful, but the transition can be steep.
+`gui-keymap.nvim` lowers the entry barrier while encouraging users to learn native Vim workflows over time.

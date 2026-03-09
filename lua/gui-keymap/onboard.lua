@@ -1,6 +1,6 @@
 local M = {}
 
-local ONBOARD_VERSION = "0.12.0"
+local ONBOARD_VERSION = "0.12.1"
 local STATE_FILE = vim.fn.stdpath("state") .. "/gui-keymap-onboard.json"
 
 local function read_state()
@@ -36,6 +36,15 @@ local function should_show_welcome()
   return state.version ~= ONBOARD_VERSION
 end
 
+local function show_and_persist()
+  vim.notify(
+    "Welcome to gui-keymap.nvim\n\nRun :GuiKeymapDemo to try GUI shortcuts safely.",
+    vim.log.levels.INFO,
+    { title = "gui-keymap" }
+  )
+  write_state({ version = ONBOARD_VERSION, shown_at = os.time() })
+end
+
 function M.setup(opts)
   if opts.show_welcome ~= true then
     return
@@ -45,18 +54,16 @@ function M.setup(opts)
     return
   end
 
+  if vim.v.vim_did_enter == 1 then
+    vim.schedule(show_and_persist)
+    return
+  end
+
   local group = vim.api.nvim_create_augroup("GuiKeymapOnboard", { clear = true })
   vim.api.nvim_create_autocmd("VimEnter", {
     group = group,
     once = true,
-    callback = function()
-      vim.notify(
-        "Welcome to gui-keymap.nvim\n\nRun :GuiKeymapDemo to try GUI shortcuts safely.",
-        vim.log.levels.INFO,
-        { title = "gui-keymap" }
-      )
-      write_state({ version = ONBOARD_VERSION, shown_at = os.time() })
-    end,
+    callback = show_and_persist,
   })
 end
 
