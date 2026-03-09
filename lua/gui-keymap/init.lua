@@ -1,4 +1,5 @@
 local config = require("gui-keymap.config")
+local commands = require("gui-keymap.commands")
 local hints = require("gui-keymap.hints")
 local keymaps = require("gui-keymap.keymaps")
 local info = require("gui-keymap.info")
@@ -59,6 +60,7 @@ function M.setup(user_opts)
 
   M.options = config.merge(user_opts)
   state.set_config(M.options)
+  commands.setup()
 
   local errors = config.validate(M.options)
   if #errors > 0 then
