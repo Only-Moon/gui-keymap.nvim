@@ -43,6 +43,8 @@ Runtime state is centralized in `lua/gui-keymap/state.lua`.
 
 `hint_repeat = -1` means always show hints.
 `show_welcome` uses persisted state and only appears on first install/update.
+When Yanky is available, clipboard actions prefer Yanky handlers. Otherwise
+gui-keymap fallback clipboard handlers are used.
 
 ==============================================================================
 3. Commands                                                 *gui-keymap-commands*

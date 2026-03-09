@@ -25,7 +25,7 @@ On first install/update, the plugin also shows a one-time welcome notification.
 - Runtime enable / disable / refresh controls
 - `:GuiKeymapInfo` diagnostics and `:checkhealth gui-keymap`
 - Optional `which-key.nvim` integration
-- Optional `yanky.nvim` detection/integration status
+- Optional `yanky.nvim` integration (clipboard actions prefer Yanky when available)
 
 ## GUI -> Vim Keymap Comparison
 
@@ -49,6 +49,12 @@ On first install/update, the plugin also shows a one-time welcome notification.
   "Only-Moon/gui-keymap.nvim",
   opts = {},
 }
+```
+
+If `lazy.nvim` is not installed, use one of the methods below and call:
+
+```lua
+require("gui-keymap").setup({})
 ```
 
 ### packer.nvim
@@ -132,6 +138,11 @@ Run:
 `:checkhealth gui-keymap`
 
 It reports plugin load status, config validity, keymap conflicts, and optional integration status.
+
+For Yanky it distinguishes:
+- not installed
+- installed but lazy-not-loaded
+- loaded in current session
 
 ## Who is this plugin for?
 
