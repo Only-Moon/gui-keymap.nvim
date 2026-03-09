@@ -3,6 +3,60 @@ local utils = require("gui-keymap.utils")
 
 local M = {}
 
+local function run_normal(keys)
+  vim.cmd.normal({ args = { keys }, bang = true })
+end
+
+local function sync_unnamed_from_plus()
+  local plus = vim.fn.getreg("+")
+  if plus == "" then
+    return
+  end
+  vim.fn.setreg('"', plus, vim.fn.getregtype("+"))
+end
+
+local function copy_selection()
+  run_normal('"+y')
+  sync_unnamed_from_plus()
+end
+
+local function copy_line()
+  run_normal('"+yy')
+  sync_unnamed_from_plus()
+end
+
+local function cut_selection()
+  run_normal('"+d')
+  sync_unnamed_from_plus()
+end
+
+local function paste_normal()
+  if vim.fn.getreg("+") ~= "" then
+    run_normal('"+p')
+    return
+  end
+  run_normal("p")
+end
+
+local function paste_insert()
+  local clip = vim.fn.getreg("+")
+  if clip == "" then
+    clip = vim.fn.getreg('"')
+  end
+  if clip == "" then
+    return
+  end
+  vim.api.nvim_paste(clip, true, -1)
+end
+
+local function delete_selection_blackhole()
+  local plus, plus_type = vim.fn.getreg("+"), vim.fn.getregtype("+")
+  local star, star_type = vim.fn.getreg("*"), vim.fn.getregtype("*")
+  run_normal('"_d')
+  vim.fn.setreg("+", plus, plus_type)
+  vim.fn.setreg("*", star, star_type)
+end
+
 ---@class GuiKeymapDefinition
 ---@field feature string
 ---@field mode string|string[]
@@ -67,7 +121,7 @@ M.registry = {
     force = true,
     mode = "x",
     lhs = "<C-c>",
-    rhs = '"+y',
+    rhs = copy_selection,
     desc = "gui-keymap: Copy selection",
     hint_key = "copy",
     preserve_mode = true,
@@ -78,7 +132,7 @@ M.registry = {
     force = true,
     mode = "n",
     lhs = "<C-c>",
-    rhs = '"+yy',
+    rhs = copy_line,
     desc = "gui-keymap: Copy line",
     hint_key = "copy",
     preserve_mode = true,
@@ -89,7 +143,7 @@ M.registry = {
     force = true,
     mode = "x",
     lhs = "<C-x>",
-    rhs = '"+d',
+    rhs = cut_selection,
     desc = "gui-keymap: Cut selection",
     hint_key = "cut",
     preserve_mode = true,
@@ -100,7 +154,7 @@ M.registry = {
     force = true,
     mode = "n",
     lhs = "<C-v>",
-    rhs = '"+p',
+    rhs = paste_normal,
     desc = "gui-keymap: Paste",
     hint_key = "paste",
     preserve_mode = true,
@@ -111,7 +165,7 @@ M.registry = {
     force = true,
     mode = "i",
     lhs = "<C-v>",
-    rhs = '"+p',
+    rhs = paste_insert,
     desc = "gui-keymap: Paste",
     hint_key = "paste",
     preserve_mode = true,
@@ -143,18 +197,18 @@ M.registry = {
     force = true,
     mode = "x",
     lhs = "<BS>",
-    rhs = '"_d',
+    rhs = delete_selection_blackhole,
     desc = "gui-keymap: Delete selection",
-    preserve_mode = true,
+    preserve_mode = false,
   },
   {
     feature = "delete_selection",
     force = true,
     mode = "x",
     lhs = "<Del>",
-    rhs = '"_d',
+    rhs = delete_selection_blackhole,
     desc = "gui-keymap: Delete selection",
-    preserve_mode = true,
+    preserve_mode = false,
   },
 
   {
