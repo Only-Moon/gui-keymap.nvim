@@ -19,6 +19,11 @@ describe("gui-keymap setup", function()
   before_each(function()
     utils.clear_plugin_maps()
     hints.reset()
+    package.loaded["yanky"] = nil
+    package.loaded["lazy"] = nil
+    package.loaded["lazy.core.config"] = nil
+    pcall(vim.keymap.del, "n", "<Plug>(YankyPutAfter)")
+    pcall(vim.keymap.del, "n", "<Plug>(YankyYank)")
   end)
 
   it("merges defaults", function()
@@ -191,6 +196,52 @@ describe("gui-keymap setup", function()
 
     assert.are.same("alpha beta", vim.api.nvim_get_current_line())
     package.loaded["yanky"] = nil
+  end)
+
+  it("tracks yanky as installed but not ready when lazy registry knows it", function()
+    package.loaded["lazy.core.config"] = {
+      plugins = {
+        yanky = { name = "yanky.nvim", url = "https://github.com/gbprod/yanky.nvim" },
+      },
+    }
+    package.loaded["lazy"] = {
+      load = function()
+        package.loaded["yanky"] = {}
+        return true
+      end,
+    }
+
+    plugin.setup({ show_welcome = false, yanky_integration = true })
+    clipboard.detect_status(true)
+
+    assert.are.same(true, state.yanky_available)
+    assert.are.same("installed-not-loaded", state.yanky_status)
+
+    clipboard.ensure_yanky_loaded()
+
+    assert.are.same("loaded-not-ready", state.yanky_status)
+    assert.is_true(state.yanky_source ~= "")
+  end)
+
+  it("uses yanky once lazy load makes plug mappings available", function()
+    package.loaded["lazy.core.config"] = {
+      plugins = {
+        yanky = { name = "yanky.nvim", url = "https://github.com/gbprod/yanky.nvim" },
+      },
+    }
+    package.loaded["lazy"] = {
+      load = function()
+        package.loaded["yanky"] = {}
+        vim.keymap.set("n", "<Plug>(YankyPutAfter)", "p")
+        vim.keymap.set("n", "<Plug>(YankyYank)", "y")
+        return true
+      end,
+    }
+
+    plugin.setup({ show_welcome = false, yanky_integration = true })
+
+    assert.is_true(clipboard.ensure_yanky_loaded())
+    assert.are.same("ready", state.yanky_status)
   end)
 
   it("keeps default clipboard toggles when config is partial", function()

@@ -78,9 +78,18 @@ local function build_lines(opts)
   if not state.yanky_available then
     yanky_status = "not installed"
   elseif state.yanky_enabled then
-    yanky_status = state.yanky_loaded and "enabled (loaded)" or "enabled (installed, lazy-not-loaded)"
+    if state.yanky_status == "ready" then
+      yanky_status = "enabled (ready)"
+    elseif state.yanky_status == "loaded-not-ready" then
+      yanky_status = "enabled (loaded, fallback active)"
+    else
+      yanky_status = "enabled (installed, lazy-not-loaded, fallback active)"
+    end
   else
     yanky_status = state.yanky_loaded and "disabled by config (loaded)" or "disabled by config (installed)"
+  end
+  if state.yanky_source ~= "" then
+    yanky_status = yanky_status .. " via " .. state.yanky_source
   end
   table.insert(lines, "Yanky integration: " .. yanky_status)
   table.insert(lines, "which-key integration: " .. (state.which_key_available and "available" or "not installed"))

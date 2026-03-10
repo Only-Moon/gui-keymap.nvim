@@ -15,6 +15,9 @@ local M = {
   yanky_loaded = false,
   yanky_enabled = false,
   yanky_checked = false,
+  yanky_status = "absent",
+  yanky_source = "",
+  yanky_probe_attempted = false,
   which_key_available = false,
   which_key_signature = nil,
 }
@@ -44,6 +47,9 @@ function M.clear_session()
   M.yanky_loaded = false
   M.yanky_enabled = false
   M.yanky_checked = false
+  M.yanky_status = "absent"
+  M.yanky_source = ""
+  M.yanky_probe_attempted = false
   M.which_key_available = false
   M.which_key_signature = nil
   active_index = {}

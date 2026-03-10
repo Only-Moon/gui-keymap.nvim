@@ -78,17 +78,20 @@ function M.check()
   end
 
   if state.yanky_available then
+    local details = state.yanky_source ~= "" and (" via " .. state.yanky_source) or ""
     if state.yanky_enabled then
-      if state.yanky_loaded then
-        ok("yanky.nvim available, loaded, and integration enabled")
+      if state.yanky_status == "ready" then
+        ok("yanky.nvim ready and integration enabled" .. details)
+      elseif state.yanky_status == "loaded-not-ready" then
+        info("yanky.nvim loaded but not ready yet; gui-keymap clipboard fallback active" .. details)
       else
-        ok("yanky.nvim installed (lazy-not-loaded) and integration enabled")
+        info("yanky.nvim installed but not loaded yet; gui-keymap clipboard fallback active" .. details)
       end
     else
       if state.yanky_loaded then
-        info("yanky.nvim loaded, but integration disabled by config")
+        info("yanky.nvim loaded, but integration disabled by config" .. details)
       else
-        info("yanky.nvim installed (lazy-not-loaded), but integration disabled by config")
+        info("yanky.nvim installed, but integration disabled by config" .. details)
       end
     end
   else
