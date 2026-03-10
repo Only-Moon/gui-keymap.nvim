@@ -1,24 +1,159 @@
-*gui-keymap.txt*     For Neovim >= 0.8.0     Last change: 2026 March 09
+*gui-keymap.txt*         For Neovim >= 0.8.0        Last change: 2026 March 10
 
 ==============================================================================
-Table of Contents                                         *gui-keymap-contents*
+Table of Contents                               *gui-keymap-table-of-contents*
 
-1. gui-keymap.nvim                                            |gui-keymap.nvim|
-2. Configuration                                         |gui-keymap-config|
-3. Commands                                             |gui-keymap-commands|
+1. gui-keymap.nvim                                |gui-keymap-gui-keymap.nvim|
+  - Requirements                     |gui-keymap-gui-keymap.nvim-requirements|
+  - Demo                                     |gui-keymap-gui-keymap.nvim-demo|
+  - Why this plugin exists |gui-keymap-gui-keymap.nvim-why-this-plugin-exists|
+  - Features                             |gui-keymap-gui-keymap.nvim-features|
+  - GUI -> Vim Keymap Comparison|gui-keymap-gui-keymap.nvim-gui-->-vim-keymap-comparison|
+  - Installation                     |gui-keymap-gui-keymap.nvim-installation|
+  - Quick Start                       |gui-keymap-gui-keymap.nvim-quick-start|
+  - Configuration                   |gui-keymap-gui-keymap.nvim-configuration|
+  - Commands                             |gui-keymap-gui-keymap.nvim-commands|
+  - Health Check                     |gui-keymap-gui-keymap.nvim-health-check|
+  - Compatibility Notes       |gui-keymap-gui-keymap.nvim-compatibility-notes|
+  - Local Testing                   |gui-keymap-gui-keymap.nvim-local-testing|
+  - Who is this plugin for?|gui-keymap-gui-keymap.nvim-who-is-this-plugin-for?|
+  - Roadmap                               |gui-keymap-gui-keymap.nvim-roadmap|
+  - Philosophy                         |gui-keymap-gui-keymap.nvim-philosophy|
 
 ==============================================================================
-1. gui-keymap.nvim                                               *gui-keymap.nvim*
+1. gui-keymap.nvim                                *gui-keymap-gui-keymap.nvim*
 
-`gui-keymap.nvim` provides GUI-style shortcuts and adaptive hints for users
-transitioning from GUI editors to Vim workflows.
+Use familiar GUI shortcuts in Neovim while learning native Vim commands.
 
-Runtime state is centralized in `lua/gui-keymap/state.lua`.
 
-==============================================================================
-2. Configuration                                            *gui-keymap-config*
+REQUIREMENTS                         *gui-keymap-gui-keymap.nvim-requirements*
 
->
+- Neovim >= 0.8.0
+- Not supported on classic Vim (non-Neovim)
+
+
+DEMO                                         *gui-keymap-gui-keymap.nvim-demo*
+
+Run `:GuiKeymapDemo` to open a safe scratch buffer and test GUI-style shortcuts
+without touching your files.
+
+On first install/update, the plugin also shows a one-time welcome notification.
+
+
+WHY THIS PLUGIN EXISTS     *gui-keymap-gui-keymap.nvim-why-this-plugin-exists*
+
+- GUI editors rely on shortcuts like `Ctrl+C`, `Ctrl+V`, and `Ctrl+Z`.
+- Vim uses native commands like `y`, `p`, and `u`.
+- `gui-keymap.nvim` bridges that gap for a smoother transition.
+
+
+FEATURES                                 *gui-keymap-gui-keymap.nvim-features*
+
+- GUI-style shortcuts for copy, paste, cut, select all, undo, redo
+- Shift + Arrow selection behavior
+- GUI-style word deletion (`<C-BS>`, `<C-Del>`)
+- Context-aware adaptive Vim hints (session-only)
+- Safe keymap registration with conflict tracking
+- Demo buffer for safe testing
+- Runtime enable / disable / refresh controls
+- `:GuiKeymapInfo` diagnostics and `:checkhealth gui-keymap`
+- Optional `which-key.nvim` integration
+- Optional `yanky.nvim` integration (clipboard actions prefer Yanky when available)
+
+
+GUI -> VIM KEYMAP COMPARISON*gui-keymap-gui-keymap.nvim-gui-->-vim-keymap-comparison*
+
+  GUI Shortcut     Action                 Vim Equivalent
+  ---------------- ---------------------- ----------------
+  Ctrl+C           Copy                   y / yy
+  Ctrl+V           Paste                  p
+  Ctrl+X           Cut                    d
+  Ctrl+A           Select All             ggVG
+  Ctrl+Z           Undo                   u
+  Ctrl+Y           Redo                   <C-r>
+  Ctrl+Backspace   Delete previous word   db
+  Ctrl+Delete      Delete next word       dw
+
+INSTALLATION                         *gui-keymap-gui-keymap.nvim-installation*
+
+
+LAZY.NVIM ~
+
+>lua
+    {
+      "Only-Moon/gui-keymap.nvim",
+      opts = {},
+    }
+<
+
+If `lazy.nvim` is not installed, use one of the methods below and call:
+
+>lua
+    require("gui-keymap").setup({})
+<
+
+
+PACKER.NVIM ~
+
+>lua
+    use({
+      "Only-Moon/gui-keymap.nvim",
+      config = function()
+        require("gui-keymap").setup({})
+      end,
+    })
+<
+
+
+VIM-PLUG ~
+
+>vim
+    Plug 'Only-Moon/gui-keymap.nvim'
+<
+
+>lua
+    require("gui-keymap").setup({})
+<
+
+
+NATIVE PACKAGES ~
+
+>sh
+    git clone https://github.com/Only-Moon/gui-keymap.nvim \
+      ~/.local/share/nvim/site/pack/gui/start/gui-keymap.nvim
+<
+
+Then call:
+
+>lua
+    require("gui-keymap").setup({})
+<
+
+
+LUAROCKS ~
+
+>sh
+    luarocks install gui-keymap.nvim
+<
+
+Then load it in your `init.lua`:
+
+>lua
+    require("gui-keymap").setup({})
+<
+
+
+QUICK START                           *gui-keymap-gui-keymap.nvim-quick-start*
+
+1. Install the plugin with your plugin manager.
+2. Start Neovim.
+3. Run `:GuiKeymapDemo`.
+4. Try the shortcuts in the demo buffer.
+
+
+CONFIGURATION                       *gui-keymap-gui-keymap.nvim-configuration*
+
+>lua
     require("gui-keymap").setup({
       undo_redo = true,
       clipboard = {
@@ -41,64 +176,158 @@ Runtime state is centralized in `lua/gui-keymap/state.lua`.
     })
 <
 
-If you do not pass any options, the defaults above are used automatically.
+If you do not pass `opts`, these defaults are used automatically.
 
-`hint_repeat = -1` means always show hints.
-`show_welcome` uses persisted state and only appears on first install/update.
-When Yanky is available, clipboard actions prefer Yanky handlers. Otherwise
-gui-keymap fallback clipboard handlers are used.
+  -------------------------------------------------------------------------
+  Option                  Default                  Purpose
+  ----------------------- ------------------------ ------------------------
+  undo_redo               true                     Enable Ctrl+Z undo and
+                                                   Ctrl+Y redo mappings.
 
-Option summary:
+  clipboard.copy          true                     Enable GUI-style copy
+                                                   mappings.
 
-- `undo_redo`
-  Enable `Ctrl+Z` and `Ctrl+Y`.
-- `clipboard.copy`
-  Enable GUI-style copy mappings.
-- `clipboard.paste`
-  Enable GUI-style paste mappings.
-- `clipboard.cut`
-  Enable GUI-style cut mappings.
-- `select_all`
-  Enable `Ctrl+A`.
-- `delete_selection`
-  Enable visual `<BS>` and `<Del>` black-hole delete mappings.
-- `shift_selection`
-  Enable Shift+Arrow selection mappings and terminal fallbacks.
-- `word_delete`
-  Enable `Ctrl+Backspace` and `Ctrl+Delete`.
-- `yanky_integration`
-  Prefer Yanky clipboard handlers when available.
-- `hint_enabled`
-  Show adaptive learning hints.
-- `hint_repeat`
-  Limit hints per shortcut per session, or use `-1` to always show.
-- `which_key_integration`
-  Register active mappings with which-key when available.
-- `enforce_on_startup`
-  Re-apply mappings during startup to handle lazy loading races.
-- `force_priority`
-  Allow gui-keymap to override conflicting default mappings.
-- `show_welcome`
-  Show the welcome message after first install or plugin version change.
-- `preserve_mode`
-  Return to the original mode for mappings that can safely preserve it.
+  clipboard.paste         true                     Enable GUI-style paste
+                                                   mappings.
 
-==============================================================================
-3. Commands                                                 *gui-keymap-commands*
+  clipboard.cut           true                     Enable GUI-style cut
+                                                   mappings.
 
-- `:GuiKeymapDemo`
-- `:GuiKeymapInfo`
-- `:GuiKeymapEnable`
-- `:GuiKeymapDisable`
-- `:GuiKeymapList`
-  Opens a scratch buffer with active mappings.
-- `:GuiKeymapSkipped`
-  Opens a scratch buffer with skipped mappings.
-- `:GuiKeymapExplain <key>`
-  Opens a scratch buffer describing one mapping.
-- `:GuiKeymapRefresh`
-- `:GuiKeymapHintReset`
-- `:checkhealth gui-keymap`
+  select_all              true                     Enable Ctrl+A select-all
+                                                   mappings.
 
-==============================================================================
+  delete_selection        true                     Enable visual-mode <BS>
+                                                   and <Del> black-hole
+                                                   delete mappings.
+
+  shift_selection         true                     Enable Shift+Arrow
+                                                   selection mappings and
+                                                   terminal fallbacks.
+
+  word_delete             true                     Enable Ctrl+Backspace
+                                                   and Ctrl+Delete word
+                                                   deletion mappings.
+
+  yanky_integration       true                     Prefer Yanky-backed
+                                                   clipboard behavior when
+                                                   Yanky is installed.
+
+  hint_enabled            true                     Show adaptive Vim
+                                                   learning hints for GUI
+                                                   shortcuts.
+
+  hint_repeat             3                        Maximum hint displays
+                                                   per shortcut in one
+                                                   session. Use -1 to
+                                                   always show hints.
+
+  which_key_integration   true                     Register active mappings
+                                                   with which-key.nvim when
+                                                   available.
+
+  enforce_on_startup      true                     Re-apply mappings during
+                                                   startup to handle
+                                                   lazy-loading race
+                                                   conditions.
+
+  force_priority          true                     Allow gui-keymap to
+                                                   overwrite conflicting
+                                                   non-user default
+                                                   mappings.
+
+  show_welcome            true                     Show a one-time welcome
+                                                   notification after a
+                                                   fresh install or plugin
+                                                   version change.
+
+  preserve_mode           true                     Return to the original
+                                                   mode for mappings that
+                                                   can safely preserve it.
+  -------------------------------------------------------------------------
+
+COMMANDS                                 *gui-keymap-gui-keymap.nvim-commands*
+
+  -----------------------------------------------------------------------
+  Command                     Description
+  --------------------------- -------------------------------------------
+  :GuiKeymapDemo              Open safe demo buffer
+
+  :GuiKeymapInfo              Open plugin diagnostics in a scratch buffer
+
+  :GuiKeymapEnable            Enable GUI mappings
+
+  :GuiKeymapDisable           Disable GUI mappings
+
+  :GuiKeymapList              Open active mappings in a scratch buffer
+
+  :GuiKeymapSkipped           Open skipped mappings in a scratch buffer
+
+  :GuiKeymapExplain <key>     Open a mapping explanation in a scratch
+                              buffer
+
+  :GuiKeymapRefresh           Re-apply mappings
+
+  :GuiKeymapHintReset         Reset in-session hint counters
+  -----------------------------------------------------------------------
+
+HEALTH CHECK                         *gui-keymap-gui-keymap.nvim-health-check*
+
+Run:
+
+`:checkhealth gui-keymap`
+
+It reports plugin load status, config validity, keymap conflicts, and optional
+integration status.
+
+For Yanky it distinguishes: - not installed - installed but lazy-not-loaded -
+loaded in current session
+
+
+COMPATIBILITY NOTES           *gui-keymap-gui-keymap.nvim-compatibility-notes*
+
+- Shift + Arrow mappings depend on your terminal emitting shifted-arrow keycodes. On some terminals the plugin will use fallback codes such as `<kL>` and `<kR>`, but support still varies by terminal emulator and multiplexer.
+- `Ctrl+Backspace` and `Ctrl+Delete` are terminal-dependent on Windows Terminal, tmux, WSL shells, and some Linux/macOS terminal defaults.
+- System clipboard behavior depends on Neovim clipboard support and your environment. When `yanky.nvim` is available, clipboard actions prefer Yanky. Otherwise gui-keymap falls back to Neovim register sync.
+- If a terminal does not emit the expected keycodes, `:GuiKeymapInfo` and `:checkhealth gui-keymap` will help you confirm which mappings were applied and which fallback mappings are active.
+
+
+LOCAL TESTING                       *gui-keymap-gui-keymap.nvim-local-testing*
+
+On Unix-like systems or CI:
+
+>sh
+    make smoke
+<
+
+On Windows PowerShell:
+
+>powershell
+    pwsh -File .\scripts\cli-smoke.ps1
+<
+
+
+WHO IS THIS PLUGIN FOR?   *gui-keymap-gui-keymap.nvim-who-is-this-plugin-for?*
+
+- Developers transitioning from VSCode or other GUI editors
+- Vim/Neovim beginners
+- Users who want GUI shortcuts while learning Vim
+- Teams onboarding developers to Neovim
+
+
+ROADMAP                                   *gui-keymap-gui-keymap.nvim-roadmap*
+
+- Transition mode
+- GUI preset profiles (VSCode / JetBrains / Sublime)
+- Advanced learning hints
+- Adaptive teaching system
+- Update changelog notification (planned for v2)
+
+
+PHILOSOPHY                             *gui-keymap-gui-keymap.nvim-philosophy*
+
+Vim is powerful, but the transition can be steep. `gui-keymap.nvim` lowers the
+entry barrier while encouraging users to learn native Vim workflows over time.
+
+Generated by panvimdoc <https://github.com/kdheepak/panvimdoc>
+
 vim:tw=78:ts=8:noet:ft=help:norl:
