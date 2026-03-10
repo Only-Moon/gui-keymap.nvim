@@ -239,6 +239,7 @@ pwsh -File .\scripts\cli-smoke.ps1
 
 - Transition mode
 - GUI preset profiles (VSCode / JetBrains / Sublime)
+- Configurable search and replace hooks for external UI plugins
 - Advanced learning hints
 - Adaptive teaching system
 - Update changelog notification (planned for v2)
