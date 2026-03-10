@@ -59,26 +59,26 @@ describe("gui-keymap setup", function()
     plugin.setup({ force_priority = true, show_welcome = false })
 
     local rhs = vim.fn.maparg("<C-c>", "n")
-    local state = utils.get_state()
+    local runtime = utils.get_state()
     assert.is_true(rhs ~= "")
-    assert.are.same(0, #state.conflicts)
+    assert.are.same(0, #runtime.conflicts)
   end)
 
   it("can disable force priority", function()
     vim.keymap.set("n", "<C-c>", "yy", { desc = "test conflict" })
     plugin.setup({ force_priority = false, show_welcome = false })
 
-    local state = utils.get_state()
-    assert.is_true(#state.conflicts > 0)
-    assert.is_true(#state.skipped_maps > 0)
+    local runtime = utils.get_state()
+    assert.is_true(#runtime.conflicts > 0)
+    assert.is_true(#runtime.skipped_maps > 0)
   end)
 
   it("overrides user mappings by default", function()
     vim.keymap.set("n", "<C-c>", "yy", { desc = "user map" })
     plugin.setup({ show_welcome = false })
 
-    local state = utils.get_state()
-    assert.are.same(0, #state.conflicts)
+    local runtime = utils.get_state()
+    assert.are.same(0, #runtime.conflicts)
   end)
 
   it("supports unlimited hints when hint_repeat is -1", function()

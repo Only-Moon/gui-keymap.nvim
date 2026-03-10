@@ -17,8 +17,22 @@ dependencies = {
 
 build = {
   type = "builtin",
+  modules = {
+    ["gui-keymap"] = "lua/gui-keymap/init.lua",
+    ["gui-keymap.clipboard"] = "lua/gui-keymap/clipboard.lua",
+    ["gui-keymap.commands"] = "lua/gui-keymap/commands.lua",
+    ["gui-keymap.config"] = "lua/gui-keymap/config.lua",
+    ["gui-keymap.demo"] = "lua/gui-keymap/demo.lua",
+    ["gui-keymap.health"] = "lua/gui-keymap/health.lua",
+    ["gui-keymap.hints"] = "lua/gui-keymap/hints.lua",
+    ["gui-keymap.info"] = "lua/gui-keymap/info.lua",
+    ["gui-keymap.keymaps"] = "lua/gui-keymap/keymaps.lua",
+    ["gui-keymap.onboard"] = "lua/gui-keymap/onboard.lua",
+    ["gui-keymap.state"] = "lua/gui-keymap/state.lua",
+    ["gui-keymap.utils"] = "lua/gui-keymap/utils.lua",
+    ["gui-keymap.version"] = "lua/gui-keymap/version.lua",
+  },
   copy_directories = {
-    "lua",
     "plugin",
     "doc",
   },
