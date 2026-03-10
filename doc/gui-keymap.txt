@@ -50,9 +50,10 @@ WHY THIS PLUGIN EXISTS     *gui-keymap-gui-keymap.nvim-why-this-plugin-exists*
 FEATURES                                 *gui-keymap-gui-keymap.nvim-features*
 
 - GUI-style shortcuts for copy, paste, cut, select all, undo, redo
+- GUI-style save, save-and-close, home, and end mappings
 - Shift + Arrow selection behavior
 - GUI-style word deletion (`<C-BS>`, `<C-Del>`)
-- Context-aware adaptive Vim hints (session-only)
+- Context-aware adaptive Vim hints with optional persisted counts
 - Safe keymap registration with conflict tracking
 - Demo buffer for safe testing
 - Runtime enable / disable / refresh controls
@@ -63,16 +64,39 @@ FEATURES                                 *gui-keymap-gui-keymap.nvim-features*
 
 GUI -> VIM KEYMAP COMPARISON*gui-keymap-gui-keymap.nvim-gui-->-vim-keymap-comparison*
 
-  GUI Shortcut     Action                 Vim Equivalent
-  ---------------- ---------------------- ----------------
-  Ctrl+C           Copy                   y / yy
-  Ctrl+V           Paste                  p
-  Ctrl+X           Cut                    d
-  Ctrl+A           Select All             ggVG
-  Ctrl+Z           Undo                   u
-  Ctrl+Y           Redo                   <C-r>
-  Ctrl+Backspace   Delete previous word   db
-  Ctrl+Delete      Delete next word       dw
+  -----------------------------------------------------------------------
+  GUI Shortcut               Action         Vim Equivalent
+  -------------------------- -------------- -----------------------------
+  Ctrl+C                     Copy           y / yy
+
+  Ctrl+V                     Paste          p
+
+  Ctrl+X                     Cut            d
+
+  Ctrl+A                     Select All     ggVG
+
+  Ctrl+Z                     Undo           u
+
+  Ctrl+Y                     Redo           <C-r>
+
+  Ctrl+S                     Save           :write
+
+  Ctrl+Q                     Save and close :wq / :update \| close
+                             window or      
+                             buffer         
+
+  Home                       Move to line   0
+                             start          
+
+  End                        Move to line   $
+                             end            
+
+  Ctrl+Backspace             Delete         db
+                             previous word  
+
+  Ctrl+Delete                Delete next    dw
+                             word           
+  -----------------------------------------------------------------------
 
 INSTALLATION                         *gui-keymap-gui-keymap.nvim-installation*
 
@@ -165,9 +189,13 @@ CONFIGURATION                       *gui-keymap-gui-keymap.nvim-configuration*
       delete_selection = true,
       shift_selection = true,
       word_delete = true,
+      save = true,
+      quit = true,
+      home_end = true,
       yanky_integration = true,
       hint_enabled = true,
       hint_repeat = 3,
+      hint_persist = true,
       which_key_integration = true,
       enforce_on_startup = true,
       force_priority = true,
@@ -208,6 +236,15 @@ If you do not pass `opts`, these defaults are used automatically.
                                                    and Ctrl+Delete word
                                                    deletion mappings.
 
+  save                    true                     Enable Ctrl+S save
+                                                   mappings.
+
+  quit                    true                     Enable Ctrl+Q
+                                                   save-and-close mappings.
+
+  home_end                true                     Enable Home / End line
+                                                   movement mappings.
+
   yanky_integration       true                     Prefer Yanky-backed
                                                    clipboard behavior when
                                                    Yanky is installed.
@@ -220,6 +257,11 @@ If you do not pass `opts`, these defaults are used automatically.
                                                    per shortcut in one
                                                    session. Use -1 to
                                                    always show hints.
+
+  hint_persist            true                     Persist hint counters
+                                                   across Neovim restarts
+                                                   using the Neovim state
+                                                   directory.
 
   which_key_integration   true                     Register active mappings
                                                    with which-key.nvim when
@@ -281,6 +323,9 @@ integration status.
 
 For Yanky it distinguishes: - not installed - installed but lazy-not-loaded -
 loaded in current session
+
+It also reports: - conflict counts by feature - terminal-sensitive mappings -
+fallback mappings - hint persistence state
 
 
 COMPATIBILITY NOTES           *gui-keymap-gui-keymap.nvim-compatibility-notes*
