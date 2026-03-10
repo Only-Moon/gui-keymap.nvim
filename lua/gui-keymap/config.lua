@@ -76,11 +76,37 @@ local function normalize_legacy_clipboard_toggles(merged)
   end
 end
 
+---@param merged GuiKeymapOptions
+local function sanitize(merged)
+  for key, default in pairs(M.defaults) do
+    if key ~= "clipboard" and key ~= "copy" and key ~= "paste" and key ~= "cut" and key ~= "undo" and key ~= "redo" then
+      if type(default) == "boolean" and type(merged[key]) ~= "boolean" then
+        merged[key] = default
+      end
+    end
+  end
+
+  if type(merged.clipboard) ~= "table" then
+    merged.clipboard = vim.deepcopy(M.defaults.clipboard)
+  end
+
+  for key, default in pairs(M.defaults.clipboard) do
+    if type(merged.clipboard[key]) ~= "boolean" then
+      merged.clipboard[key] = default
+    end
+  end
+
+  if type(merged.hint_repeat) ~= "number" or (merged.hint_repeat < 0 and merged.hint_repeat ~= -1) then
+    merged.hint_repeat = M.defaults.hint_repeat
+  end
+end
+
 ---@param user_opts GuiKeymapOptions|nil
 ---@return GuiKeymapOptions
 function M.merge(user_opts)
   local merged = vim.tbl_deep_extend("force", {}, M.defaults, user_opts or {})
   normalize_legacy_clipboard_toggles(merged)
+  sanitize(merged)
   return merged
 end
 

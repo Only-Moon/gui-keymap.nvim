@@ -36,27 +36,31 @@ function M.safe_map(mode, lhs, rhs, opts, feature, force)
   local modes = normalize_modes(mode)
   local final_opts = vim.tbl_extend("force", { noremap = true, silent = true }, opts or {})
   local desc = final_opts.desc or ("gui-keymap: " .. lhs)
+  local applied = false
 
   for _, current_mode in ipairs(modes) do
+    state.register_requested_map(current_mode, lhs, desc, feature)
     local existing = M.inspect_mapping(current_mode, lhs)
     local has_existing = type(existing) == "table" and next(existing) ~= nil
 
     if has_existing and not is_builtin_default(existing) and not force then
       state.add_conflict(current_mode, lhs, desc, existing)
+      state.register_skipped_map(current_mode, lhs, desc, "conflict")
     else
       vim.keymap.set(current_mode, lhs, rhs, final_opts)
       state.register_map(current_mode, lhs, desc, feature)
+      applied = true
     end
   end
 
-  return true
+  return applied
 end
 
 function M.clear_plugin_maps()
   for _, mapping in ipairs(state.get_active_maps()) do
     pcall(vim.keymap.del, mapping.mode, mapping.lhs)
   end
-  state.clear_runtime()
+  state.clear_maps()
 end
 
 function M.mark_feature_disabled(feature)
@@ -75,6 +79,37 @@ end
 
 function M.get_state()
   return state
+end
+
+function M.mark_fallback_map(mode, lhs)
+  state.register_fallback_map(mode, lhs)
+end
+
+function M.mark_terminal_sensitive(mode, lhs)
+  state.register_terminal_sensitive(mode, lhs)
+end
+
+---@param title string
+---@param lines string[]
+---@param filetype string|nil
+function M.open_scratch_window(title, lines, filetype)
+  vim.cmd("enew")
+
+  local buf = vim.api.nvim_get_current_buf()
+  vim.bo[buf].buftype = "nofile"
+  vim.bo[buf].bufhidden = "wipe"
+  vim.bo[buf].swapfile = false
+  vim.bo[buf].modifiable = true
+  vim.bo[buf].filetype = filetype or "gui-keymap-info"
+
+  local content = { title, "" }
+  vim.list_extend(content, lines)
+
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, content)
+  vim.api.nvim_win_set_cursor(0, { 1, 0 })
+  vim.bo[buf].modifiable = false
+
+  return buf
 end
 
 function M.get_conflicts()

@@ -70,6 +70,7 @@ describe("gui-keymap setup", function()
 
     local state = utils.get_state()
     assert.is_true(#state.conflicts > 0)
+    assert.is_true(#state.skipped_maps > 0)
   end)
 
   it("overrides user mappings by default", function()
@@ -90,6 +91,18 @@ describe("gui-keymap setup", function()
     assert.is_true((state.hint_counts.copy or 0) > 0)
   end)
 
+  it("preserves hint progress across refresh", function()
+    plugin.setup({ hint_enabled = true, hint_repeat = 5, show_welcome = false })
+
+    state.hint_last_ts.copy = 0
+    hints.show("copy")
+    local before = state.hint_counts.copy
+
+    plugin.refresh()
+
+    assert.are.same(before, state.hint_counts.copy)
+  end)
+
   it("applies mappings when preserve_mode is enabled", function()
     plugin.setup({ preserve_mode = true, show_welcome = false })
     assert.is_true(map_present("n", "<C-a>"))
@@ -103,6 +116,24 @@ describe("gui-keymap setup", function()
     })
 
     assert.are.same(false, opts.clipboard.copy)
+    assert.are.same(true, opts.clipboard.paste)
+    assert.are.same(true, opts.clipboard.cut)
+  end)
+
+  it("sanitizes invalid config types back to defaults", function()
+    local opts = plugin.setup({
+      hint_repeat = "bad",
+      force_priority = "bad",
+      clipboard = {
+        copy = "bad",
+        paste = true,
+      },
+      show_welcome = false,
+    })
+
+    assert.are.same(3, opts.hint_repeat)
+    assert.are.same(true, opts.force_priority)
+    assert.are.same(true, opts.clipboard.copy)
     assert.are.same(true, opts.clipboard.paste)
     assert.are.same(true, opts.clipboard.cut)
   end)
@@ -132,6 +163,20 @@ describe("gui-keymap setup", function()
     assert.are.same(2, vim.fn.exists(":GuiKeymapList"))
     assert.are.same(2, vim.fn.exists(":GuiKeymapExplain"))
   end)
+
+  it("provides generated explain keys", function()
+    plugin.setup({ show_welcome = false })
+
+    local keys = require("gui-keymap.keymaps").explain_keys()
+    assert.is_true(vim.tbl_contains(keys, "<C-c>"))
+    assert.is_true(vim.tbl_contains(keys, "<C-Del>"))
+  end)
+
+  it("tracks requested mappings", function()
+    plugin.setup({ show_welcome = false })
+
+    assert.is_true(#state.requested_maps >= #state.active_maps)
+  end)
 end)
 
 describe("gui-keymap demo", function()
@@ -149,5 +194,30 @@ describe("gui-keymap demo", function()
     assert.are.same("gui-keymap.nvim demo", lines[1])
     assert.is_true(vim.tbl_contains(lines, "Ctrl+Backspace -> Delete previous word"))
     assert.is_true(vim.tbl_contains(lines, "Ctrl+Delete -> Delete next word"))
+  end)
+end)
+
+describe("gui-keymap info surfaces", function()
+  it("opens info in a scratch buffer", function()
+    plugin.setup({ show_welcome = false })
+    plugin.show_info()
+
+    local buf = vim.api.nvim_get_current_buf()
+    local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+
+    assert.are.same("nofile", vim.bo[buf].buftype)
+    assert.are.same("gui-keymap.nvim", lines[1])
+  end)
+
+  it("opens explain output in a scratch buffer", function()
+    plugin.setup({ show_welcome = false })
+    plugin.explain_key("<C-c>")
+
+    local buf = vim.api.nvim_get_current_buf()
+    local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+
+    assert.are.same("nofile", vim.bo[buf].buftype)
+    assert.are.same("GuiKeymapExplain", lines[1])
+    assert.is_true(vim.tbl_contains(lines, "Vim equivalent: y / yy"))
   end)
 end)

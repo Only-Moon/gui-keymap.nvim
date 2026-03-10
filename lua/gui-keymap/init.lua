@@ -6,11 +6,13 @@ local info = require("gui-keymap.info")
 local onboard = require("gui-keymap.onboard")
 local state = require("gui-keymap.state")
 local utils = require("gui-keymap.utils")
+local version = require("gui-keymap.version")
 
 local M = {}
 
 ---@type GuiKeymapOptions
 M.options = config.merge()
+M.version = version.current
 M._enforce_group = nil
 M._setup_done = false
 
@@ -19,7 +21,6 @@ function M.apply()
     return
   end
 
-  hints.setup(M.options)
   keymaps.apply(M.options)
 end
 
@@ -61,6 +62,7 @@ function M.setup(user_opts)
   M.options = config.merge(user_opts)
   state.set_config(M.options)
   commands.setup()
+  hints.setup(M.options)
 
   local errors = config.validate(M.options)
   if #errors > 0 then
@@ -110,17 +112,11 @@ function M.refresh()
 end
 
 function M.list_keymaps()
-  local lines = {}
-  for _, mapping in ipairs(state.get_active_maps()) do
-    table.insert(lines, string.format("[%s] %s -> %s", mapping.mode, mapping.lhs, mapping.desc))
-  end
+  info.open_keymap_list()
+end
 
-  if #lines == 0 then
-    vim.notify("gui-keymap: no active mappings", vim.log.levels.INFO)
-    return
-  end
-
-  vim.notify(table.concat(lines, "\n"), vim.log.levels.INFO, { title = "GuiKeymapList" })
+function M.list_skipped_keymaps()
+  info.open_skipped_maps()
 end
 
 ---@param key string
@@ -131,9 +127,7 @@ function M.explain_key(key)
     return
   end
 
-  vim.notify(string.format("%s -> %s\nVim equivalent -> %s", key, item.gui, item.vim), vim.log.levels.INFO, {
-    title = "GuiKeymapExplain",
-  })
+  info.open_explain(key, item)
 end
 
 return M

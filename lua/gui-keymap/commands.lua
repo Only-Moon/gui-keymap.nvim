@@ -29,13 +29,17 @@ function M.setup()
     plugin.list_keymaps()
   end, { desc = "List active gui-keymap mappings" })
 
+  vim.api.nvim_create_user_command("GuiKeymapSkipped", function()
+    plugin.list_skipped_keymaps()
+  end, { desc = "List skipped gui-keymap mappings" })
+
   vim.api.nvim_create_user_command("GuiKeymapExplain", function(args)
     plugin.explain_key(args.args)
   end, {
     desc = "Explain a gui-keymap key",
     nargs = 1,
     complete = function()
-      return { "<C-c>", "<C-v>", "<C-x>", "<C-a>", "<C-z>", "<C-y>", "<C-BS>", "<C-Del>" }
+      return require("gui-keymap.keymaps").explain_keys()
     end,
   })
 

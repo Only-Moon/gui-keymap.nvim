@@ -7,9 +7,9 @@ local M = {}
 local function build_lines(opts)
   local state = utils.get_state()
   local lines = {
-    "gui-keymap.nvim",
-    "",
     "Active GUI keymaps: " .. tostring(#state.active_maps),
+    "Requested GUI keymaps: " .. tostring(#state.requested_maps),
+    "Skipped GUI keymaps: " .. tostring(#state.skipped_maps),
   }
 
   table.insert(lines, "Disabled features:")
@@ -42,6 +42,18 @@ local function build_lines(opts)
   end
 
   table.insert(lines, "")
+  table.insert(lines, "Fallback mappings: " .. tostring(#state.fallback_maps))
+  for _, mapping in ipairs(state.fallback_maps) do
+    table.insert(lines, string.format("- [%s] %s", mapping.mode, mapping.lhs))
+  end
+
+  table.insert(lines, "")
+  table.insert(lines, "Terminal-sensitive mappings: " .. tostring(#state.terminal_sensitive))
+  for _, mapping in ipairs(state.terminal_sensitive) do
+    table.insert(lines, string.format("- [%s] %s", mapping.mode, mapping.lhs))
+  end
+
+  table.insert(lines, "")
   local yanky_status
   if not state.yanky_available then
     yanky_status = "not installed"
@@ -60,10 +72,55 @@ local function build_lines(opts)
   return lines
 end
 
+function M.open_report(opts)
+  local lines = build_lines(opts)
+  utils.open_scratch_window("gui-keymap.nvim", lines, "gui-keymap-info")
+end
+
+function M.open_keymap_list()
+  local state = utils.get_state()
+  local lines = {}
+
+  for _, mapping in ipairs(state.get_active_maps()) do
+    table.insert(lines, string.format("[%s] %s -> %s", mapping.mode, mapping.lhs, mapping.desc))
+  end
+
+  if #lines == 0 then
+    table.insert(lines, "No active mappings.")
+  end
+
+  utils.open_scratch_window("GuiKeymapList", lines, "gui-keymap-info")
+end
+
+function M.open_skipped_maps()
+  local state = utils.get_state()
+  local lines = {}
+
+  for _, mapping in ipairs(state.skipped_maps) do
+    table.insert(lines, string.format("[%s] %s -> %s (%s)", mapping.mode, mapping.lhs, mapping.desc, mapping.reason))
+  end
+
+  if #lines == 0 then
+    table.insert(lines, "No skipped mappings.")
+  end
+
+  utils.open_scratch_window("GuiKeymapSkipped", lines, "gui-keymap-info")
+end
+
+function M.open_explain(key, item)
+  local lines = {
+    string.format("Key: %s", key),
+    "",
+    string.format("GUI mapping: %s", item.gui),
+    string.format("Vim equivalent: %s", item.vim),
+  }
+
+  utils.open_scratch_window("GuiKeymapExplain", lines, "gui-keymap-info")
+end
+
 ---@param opts GuiKeymapOptions
 function M.show(opts)
-  local lines = build_lines(opts)
-  vim.notify(table.concat(lines, "\n"), vim.log.levels.INFO, { title = "GuiKeymapInfo" })
+  M.open_report(opts)
 end
 
 return M

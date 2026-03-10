@@ -54,6 +54,15 @@ function M.check()
 
   local state = utils.get_state()
   local conflicts = utils.get_conflicts()
+  ok(
+    string.format(
+      "requested %d mappings, applied %d, skipped %d",
+      #state.requested_maps,
+      #state.active_maps,
+      #state.skipped_maps
+    )
+  )
+
   if #conflicts == 0 then
     ok("no keymap conflicts detected")
   else
@@ -84,6 +93,14 @@ function M.check()
     ok("which-key.nvim available")
   else
     info("which-key.nvim not installed (optional)")
+  end
+
+  if #state.fallback_maps > 0 then
+    info(string.format("%d terminal fallback mappings active", #state.fallback_maps))
+  end
+
+  if #state.terminal_sensitive > 0 then
+    info(string.format("%d terminal-sensitive mappings detected", #state.terminal_sensitive))
   end
 end
 

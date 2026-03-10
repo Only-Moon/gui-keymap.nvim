@@ -189,8 +189,6 @@ end
 function M.setup(opts)
   M.enabled = opts.hint_enabled == true
   M.max_repeat = tonumber(opts.hint_repeat) or 3
-  state.hint_counts = {}
-  state.hint_last_ts = {}
 end
 
 function M.reset()

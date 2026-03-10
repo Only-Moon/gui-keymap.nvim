@@ -1,121 +1,8 @@
+local clipboard = require("gui-keymap.clipboard")
 local hints = require("gui-keymap.hints")
 local utils = require("gui-keymap.utils")
 
 local M = {}
-
-local function termcodes(keys)
-  return vim.api.nvim_replace_termcodes(keys, true, false, true)
-end
-
-local function feed(keys)
-  vim.api.nvim_feedkeys(termcodes(keys), "m", false)
-end
-
-local function run_normal(keys)
-  vim.cmd.normal({ args = { keys }, bang = true })
-end
-
-local function yanky_runtime_installed()
-  return #vim.api.nvim_get_runtime_file("lua/yanky.lua", false) > 0
-    or #vim.api.nvim_get_runtime_file("lua/yanky/init.lua", false) > 0
-end
-
-local function ensure_yanky_loaded()
-  if package.loaded["yanky"] ~= nil then
-    return true
-  end
-
-  if not yanky_runtime_installed() then
-    return false
-  end
-
-  pcall(require, "yanky")
-  return package.loaded["yanky"] ~= nil
-end
-
-local function sync_unnamed_from_plus()
-  local plus = vim.fn.getreg("+")
-  if plus == "" then
-    return
-  end
-  vim.fn.setreg('"', plus, vim.fn.getregtype("+"))
-end
-
-local function sync_plus_from_unnamed()
-  local unnamed = vim.fn.getreg('"')
-  if unnamed == "" then
-    return
-  end
-  local regtype = vim.fn.getregtype('"')
-  vim.fn.setreg("+", unnamed, regtype)
-  vim.fn.setreg("*", unnamed, regtype)
-end
-
-local function copy_selection()
-  if ensure_yanky_loaded() then
-    feed("<Plug>(YankyYank)")
-    sync_plus_from_unnamed()
-    return
-  end
-  run_normal('"+y')
-  sync_unnamed_from_plus()
-end
-
-local function copy_line()
-  if ensure_yanky_loaded() then
-    run_normal("yy")
-    sync_plus_from_unnamed()
-    return
-  end
-  run_normal('"+yy')
-  sync_unnamed_from_plus()
-end
-
-local function cut_selection()
-  if ensure_yanky_loaded() then
-    feed("<Plug>(YankyYank)")
-    run_normal([[gv"_d]])
-    sync_plus_from_unnamed()
-    return
-  end
-  run_normal('"+d')
-  sync_unnamed_from_plus()
-end
-
-local function paste_normal()
-  if ensure_yanky_loaded() then
-    feed("<Plug>(YankyPutAfter)")
-    return
-  end
-  if vim.fn.getreg("+") ~= "" then
-    run_normal('"+p')
-    return
-  end
-  run_normal("p")
-end
-
-local function paste_insert()
-  if ensure_yanky_loaded() then
-    feed("<Esc><Plug>(YankyPutAfter)a")
-    return
-  end
-  local clip = vim.fn.getreg("+")
-  if clip == "" then
-    clip = vim.fn.getreg('"')
-  end
-  if clip == "" then
-    return
-  end
-  vim.api.nvim_paste(clip, true, -1)
-end
-
-local function delete_selection_blackhole()
-  local plus, plus_type = vim.fn.getreg("+"), vim.fn.getregtype("+")
-  local star, star_type = vim.fn.getreg("*"), vim.fn.getregtype("*")
-  run_normal('"_d')
-  vim.fn.setreg("+", plus, plus_type)
-  vim.fn.setreg("*", star, star_type)
-end
 
 ---@class GuiKeymapDefinition
 ---@field feature string
@@ -181,7 +68,7 @@ M.registry = {
     force = true,
     mode = "x",
     lhs = "<C-c>",
-    rhs = copy_selection,
+    rhs = clipboard.copy_selection,
     desc = "gui-keymap: Copy selection",
     hint_key = "copy",
     preserve_mode = true,
@@ -192,7 +79,7 @@ M.registry = {
     force = true,
     mode = "n",
     lhs = "<C-c>",
-    rhs = copy_line,
+    rhs = clipboard.copy_line,
     desc = "gui-keymap: Copy line",
     hint_key = "copy",
     preserve_mode = true,
@@ -203,7 +90,7 @@ M.registry = {
     force = true,
     mode = "x",
     lhs = "<C-x>",
-    rhs = cut_selection,
+    rhs = clipboard.cut_selection,
     desc = "gui-keymap: Cut selection",
     hint_key = "cut",
     preserve_mode = true,
@@ -214,7 +101,7 @@ M.registry = {
     force = true,
     mode = "n",
     lhs = "<C-v>",
-    rhs = paste_normal,
+    rhs = clipboard.paste_normal,
     desc = "gui-keymap: Paste",
     hint_key = "paste",
     preserve_mode = true,
@@ -225,7 +112,7 @@ M.registry = {
     force = true,
     mode = "i",
     lhs = "<C-v>",
-    rhs = paste_insert,
+    rhs = clipboard.paste_insert,
     desc = "gui-keymap: Paste",
     hint_key = "paste",
     preserve_mode = true,
@@ -257,7 +144,7 @@ M.registry = {
     force = true,
     mode = "x",
     lhs = "<BS>",
-    rhs = delete_selection_blackhole,
+    rhs = clipboard.delete_selection_blackhole,
     desc = "gui-keymap: Delete selection",
     preserve_mode = false,
   },
@@ -266,7 +153,7 @@ M.registry = {
     force = true,
     mode = "x",
     lhs = "<Del>",
-    rhs = delete_selection_blackhole,
+    rhs = clipboard.delete_selection_blackhole,
     desc = "gui-keymap: Delete selection",
     preserve_mode = false,
   },
@@ -628,6 +515,12 @@ end
 local function apply_main_registry(opts)
   for _, item in ipairs(M.registry) do
     if item_enabled(opts, item) then
+      if item.lhs:match("^<k[LRUD]>$") then
+        utils.mark_fallback_map(item.mode, item.lhs)
+      end
+      if item.feature == "shift_selection" or item.lhs:match("^<S%-") or item.lhs:match("^<k[LRUD]>$") then
+        utils.mark_terminal_sensitive(item.mode, item.lhs)
+      end
       local rhs = with_mode_restore(item.rhs, opts, item)
       rhs = hints.wrap(item.mode, rhs, item.hint_key)
       utils.safe_map(
@@ -646,10 +539,7 @@ end
 
 ---@param opts GuiKeymapOptions
 local function apply_yanky_registry(opts)
-  local loaded_yanky = package.loaded["yanky"] ~= nil
-  local has_yanky = loaded_yanky or yanky_runtime_installed()
-
-  utils.set_yanky_status(has_yanky, loaded_yanky, opts.yanky_integration == true)
+  clipboard.detect_status(opts.yanky_integration)
 
   if opts.yanky_integration ~= true then
     utils.mark_feature_disabled("yanky_integration")
@@ -677,8 +567,21 @@ local function register_with_which_key(opts)
     return
   end
 
+  local state = utils.get_state()
+  local signature_parts = {}
+  for _, entry in ipairs(entries) do
+    table.insert(signature_parts, string.format("%s:%s:%s", entry.mode, entry[1], entry.desc))
+  end
+  table.sort(signature_parts)
+
+  local signature = table.concat(signature_parts, "|")
+  if state.which_key_signature == signature then
+    return
+  end
+
   if type(wk.add) == "function" then
     wk.add(entries)
+    state.which_key_signature = signature
     return
   end
 
@@ -688,6 +591,7 @@ local function register_with_which_key(opts)
       grouped[entry[1]] = entry.desc
     end
     wk.register(grouped)
+    state.which_key_signature = signature
   end
 end
 
@@ -703,6 +607,12 @@ end
 ---@return table|nil
 function M.explain_key(key)
   return M.explain[key]
+end
+
+function M.explain_keys()
+  local keys = vim.tbl_keys(M.explain)
+  table.sort(keys)
+  return keys
 end
 
 return M
