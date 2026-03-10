@@ -58,16 +58,37 @@ function M.setup(opts)
     return
   end
 
+  local shown = false
+  local function once_show()
+    if shown then
+      return
+    end
+    shown = true
+    show_and_persist()
+  end
+
   if vim.v.vim_did_enter == 1 then
-    vim.schedule(show_and_persist)
+    if package.loaded["notify"] ~= nil or package.loaded["snacks"] ~= nil then
+      vim.schedule(once_show)
+    else
+      vim.defer_fn(once_show, 400)
+    end
     return
   end
 
   local group = vim.api.nvim_create_augroup("GuiKeymapOnboard", { clear = true })
+  vim.api.nvim_create_autocmd("User", {
+    group = group,
+    pattern = { "VeryLazy", "LazyDone" },
+    once = true,
+    callback = once_show,
+  })
   vim.api.nvim_create_autocmd("VimEnter", {
     group = group,
     once = true,
-    callback = show_and_persist,
+    callback = function()
+      vim.defer_fn(once_show, 400)
+    end,
   })
 end
 

@@ -1,3 +1,4 @@
 vendor/plenary.nvim
 
 .nvimlog
+doc/tags
