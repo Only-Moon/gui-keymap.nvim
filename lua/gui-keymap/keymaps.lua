@@ -31,33 +31,12 @@ local function quit_current_insert()
   quit_current()
 end
 
-local function select_all_normal()
-  vim.cmd.normal({ args = { "ggVG" }, bang = true })
+local function select_all_visual()
+  vim.api.nvim_feedkeys(termcodes("<Esc>ggVG"), "nx", false)
 end
 
 local function select_all_insert()
-  vim.cmd("stopinsert")
-  select_all_normal()
-end
-
-local function select_all_visual()
-  vim.api.nvim_feedkeys(termcodes("<Esc>ggVG"), "n", false)
-end
-
-local function undo_normal()
-  vim.cmd.undo()
-end
-
-local function redo_normal()
-  vim.cmd.redo()
-end
-
-local function undo_insert()
-  vim.api.nvim_feedkeys(termcodes("<C-o>u"), "n", false)
-end
-
-local function redo_insert()
-  vim.api.nvim_feedkeys(termcodes("<C-o><C-r>"), "n", false)
+  vim.api.nvim_feedkeys(termcodes("<Esc>ggVG"), "nx", false)
 end
 
 ---@class GuiKeymapDefinition
@@ -79,10 +58,10 @@ M.registry = {
     force = true,
     mode = "n",
     lhs = "<C-z>",
-    rhs = undo_normal,
+    rhs = "u",
     desc = "gui-keymap: Undo",
     hint_key = "undo",
-    preserve_mode = false,
+    preserve_mode = true,
   },
   {
     feature = "undo_redo",
@@ -90,10 +69,10 @@ M.registry = {
     force = true,
     mode = "n",
     lhs = "<C-y>",
-    rhs = redo_normal,
+    rhs = "<C-r>",
     desc = "gui-keymap: Redo",
     hint_key = "redo",
-    preserve_mode = false,
+    preserve_mode = true,
   },
   {
     feature = "undo_redo",
@@ -101,10 +80,10 @@ M.registry = {
     force = true,
     mode = "i",
     lhs = "<C-z>",
-    rhs = undo_insert,
+    rhs = "<C-o>u",
     desc = "gui-keymap: Undo",
     hint_key = "undo",
-    preserve_mode = false,
+    preserve_mode = true,
   },
   {
     feature = "undo_redo",
@@ -112,10 +91,10 @@ M.registry = {
     force = true,
     mode = "i",
     lhs = "<C-y>",
-    rhs = redo_insert,
+    rhs = "<C-o><C-r>",
     desc = "gui-keymap: Redo",
     hint_key = "redo",
-    preserve_mode = false,
+    preserve_mode = true,
   },
   {
     feature = "clipboard",
@@ -177,7 +156,7 @@ M.registry = {
     force = true,
     mode = "n",
     lhs = "<C-a>",
-    rhs = select_all_normal,
+    rhs = "ggVG",
     desc = "gui-keymap: Select all",
     hint_key = "select_all",
     preserve_mode = false,
@@ -664,7 +643,7 @@ local function materialize_rhs(mode, rhs)
       return
     end
 
-    vim.api.nvim_feedkeys(termcodes(rhs), "n", false)
+    vim.api.nvim_feedkeys(termcodes(rhs), "nx", false)
   end
 end
 

@@ -150,6 +150,18 @@ describe("gui-keymap setup", function()
     assert.are.same(3, vim.api.nvim_win_get_cursor(0)[1])
   end)
 
+  it("re-selects all when Ctrl+A is pressed from visual mode", function()
+    plugin.setup({ show_welcome = false })
+    vim.cmd("enew")
+    vim.api.nvim_buf_set_lines(0, 0, -1, false, { "one", "two", "three" })
+    vim.cmd("normal! ggVj")
+
+    invoke_map("v", "<C-a>")
+
+    assert.are.same("V", vim.api.nvim_get_mode().mode)
+    assert.are.same(3, vim.api.nvim_win_get_cursor(0)[1])
+  end)
+
   it("falls back to built-in clipboard paste when yanky is not ready", function()
     plugin.setup({ show_welcome = false, yanky_integration = true })
     package.loaded["yanky"] = {}
