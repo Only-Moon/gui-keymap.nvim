@@ -642,9 +642,10 @@ local function materialize_rhs(mode, rhs)
 
   local current_mode = type(mode) == "table" and mode[1] or mode
   current_mode = normalize_mode(current_mode)
+  local has_keycodes = rhs:find("<", 1, true) ~= nil and rhs:find(">", 1, true) ~= nil
 
   return function()
-    if current_mode == "n" then
+    if current_mode == "n" and not has_keycodes then
       vim.cmd.normal({ args = { rhs }, bang = true })
       return
     end

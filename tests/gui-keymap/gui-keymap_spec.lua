@@ -235,6 +235,24 @@ describe("gui-keymap setup", function()
     assert.are.same(2, vim.fn.exists(":GuiKeymapExplain"))
   end)
 
+  it("auto-applies default setup from plugin loader", function()
+    local commands = require("gui-keymap.commands")
+    local gui_keymap = require("gui-keymap")
+
+    utils.clear_plugin_maps()
+    gui_keymap._setup_done = false
+    commands._registered = false
+    vim.g.loaded_gui_keymap = nil
+
+    vim.cmd("runtime plugin/gui-keymap.lua")
+    vim.wait(50, function()
+      return require("gui-keymap")._setup_done
+    end)
+
+    assert.is_true(map_present("n", "<C-a>"))
+    assert.is_true(map_present("n", "<C-v>"))
+  end)
+
   it("provides generated explain keys", function()
     plugin.setup({ show_welcome = false })
 
@@ -304,5 +322,23 @@ describe("gui-keymap info surfaces", function()
     assert.are.same("nofile", vim.bo[buf].buftype)
     assert.are.same("GuiKeymapExplain", lines[1])
     assert.is_true(vim.tbl_contains(lines, "Vim equivalent: y / yy"))
+  end)
+end)
+
+describe("gui-keymap keycode mappings", function()
+  before_each(function()
+    utils.clear_plugin_maps()
+    hints.reset()
+  end)
+
+  it("does not inject literal keycode text for normal-mode shift selection mappings", function()
+    plugin.setup({ show_welcome = false })
+    vim.cmd("enew")
+    vim.api.nvim_buf_set_lines(0, 0, -1, false, { "one", "two" })
+    vim.api.nvim_win_set_cursor(0, { 1, 1 })
+
+    invoke_map("n", "<S-Down>")
+
+    assert.are.same({ "one", "two" }, vim.api.nvim_buf_get_lines(0, 0, -1, false))
   end)
 end)
