@@ -90,6 +90,24 @@ git clone https://github.com/Only-Moon/gui-keymap.nvim \
   ~/.local/share/nvim/site/pack/gui/start/gui-keymap.nvim
 ```
 
+Then call:
+
+```lua
+require("gui-keymap").setup({})
+```
+
+### LuaRocks
+
+```sh
+luarocks install gui-keymap.nvim
+```
+
+Then load it in your `init.lua`:
+
+```lua
+require("gui-keymap").setup({})
+```
+
 ## Quick Start
 
 1. Install the plugin with your plugin manager.
@@ -122,16 +140,38 @@ require("gui-keymap").setup({
 })
 ```
 
+If you do not pass `opts`, these defaults are used automatically.
+
+| Option | Default | Purpose |
+|--------|---------|---------|
+| `undo_redo` | `true` | Enable `Ctrl+Z` undo and `Ctrl+Y` redo mappings. |
+| `clipboard.copy` | `true` | Enable GUI-style copy mappings. |
+| `clipboard.paste` | `true` | Enable GUI-style paste mappings. |
+| `clipboard.cut` | `true` | Enable GUI-style cut mappings. |
+| `select_all` | `true` | Enable `Ctrl+A` select-all mappings. |
+| `delete_selection` | `true` | Enable visual-mode `<BS>` and `<Del>` black-hole delete mappings. |
+| `shift_selection` | `true` | Enable Shift+Arrow selection mappings and terminal fallbacks. |
+| `word_delete` | `true` | Enable `Ctrl+Backspace` and `Ctrl+Delete` word deletion mappings. |
+| `yanky_integration` | `true` | Prefer Yanky-backed clipboard behavior when Yanky is installed. |
+| `hint_enabled` | `true` | Show adaptive Vim learning hints for GUI shortcuts. |
+| `hint_repeat` | `3` | Maximum hint displays per shortcut in one session. Use `-1` to always show hints. |
+| `which_key_integration` | `true` | Register active mappings with `which-key.nvim` when available. |
+| `enforce_on_startup` | `true` | Re-apply mappings during startup to handle lazy-loading race conditions. |
+| `force_priority` | `true` | Allow gui-keymap to overwrite conflicting non-user default mappings. |
+| `show_welcome` | `true` | Show a one-time welcome notification after a fresh install or plugin version change. |
+| `preserve_mode` | `true` | Return to the original mode for mappings that can safely preserve it. |
+
 ## Commands
 
 | Command | Description |
 |--------|-------------|
 | `:GuiKeymapDemo` | Open safe demo buffer |
-| `:GuiKeymapInfo` | Show plugin diagnostics summary |
+| `:GuiKeymapInfo` | Open plugin diagnostics in a scratch buffer |
 | `:GuiKeymapEnable` | Enable GUI mappings |
 | `:GuiKeymapDisable` | Disable GUI mappings |
-| `:GuiKeymapList` | List active mappings |
-| `:GuiKeymapExplain <key>` | Explain one mapped key |
+| `:GuiKeymapList` | Open active mappings in a scratch buffer |
+| `:GuiKeymapSkipped` | Open skipped mappings in a scratch buffer |
+| `:GuiKeymapExplain <key>` | Open a mapping explanation in a scratch buffer |
 | `:GuiKeymapRefresh` | Re-apply mappings |
 | `:GuiKeymapHintReset` | Reset in-session hint counters |
 
@@ -147,6 +187,27 @@ For Yanky it distinguishes:
 - not installed
 - installed but lazy-not-loaded
 - loaded in current session
+
+## Compatibility Notes
+
+- Shift + Arrow mappings depend on your terminal emitting shifted-arrow keycodes. On some terminals the plugin will use fallback codes such as `<kL>` and `<kR>`, but support still varies by terminal emulator and multiplexer.
+- `Ctrl+Backspace` and `Ctrl+Delete` are terminal-dependent on Windows Terminal, tmux, WSL shells, and some Linux/macOS terminal defaults.
+- System clipboard behavior depends on Neovim clipboard support and your environment. When `yanky.nvim` is available, clipboard actions prefer Yanky. Otherwise gui-keymap falls back to Neovim register sync.
+- If a terminal does not emit the expected keycodes, `:GuiKeymapInfo` and `:checkhealth gui-keymap` will help you confirm which mappings were applied and which fallback mappings are active.
+
+## Local Testing
+
+On Unix-like systems or CI:
+
+```sh
+make smoke
+```
+
+On Windows PowerShell:
+
+```powershell
+pwsh -File .\scripts\cli-smoke.ps1
+```
 
 ## Who is this plugin for?
 

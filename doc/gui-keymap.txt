@@ -41,10 +41,47 @@ Runtime state is centralized in `lua/gui-keymap/state.lua`.
     })
 <
 
+If you do not pass any options, the defaults above are used automatically.
+
 `hint_repeat = -1` means always show hints.
 `show_welcome` uses persisted state and only appears on first install/update.
 When Yanky is available, clipboard actions prefer Yanky handlers. Otherwise
 gui-keymap fallback clipboard handlers are used.
+
+Option summary:
+
+- `undo_redo`
+  Enable `Ctrl+Z` and `Ctrl+Y`.
+- `clipboard.copy`
+  Enable GUI-style copy mappings.
+- `clipboard.paste`
+  Enable GUI-style paste mappings.
+- `clipboard.cut`
+  Enable GUI-style cut mappings.
+- `select_all`
+  Enable `Ctrl+A`.
+- `delete_selection`
+  Enable visual `<BS>` and `<Del>` black-hole delete mappings.
+- `shift_selection`
+  Enable Shift+Arrow selection mappings and terminal fallbacks.
+- `word_delete`
+  Enable `Ctrl+Backspace` and `Ctrl+Delete`.
+- `yanky_integration`
+  Prefer Yanky clipboard handlers when available.
+- `hint_enabled`
+  Show adaptive learning hints.
+- `hint_repeat`
+  Limit hints per shortcut per session, or use `-1` to always show.
+- `which_key_integration`
+  Register active mappings with which-key when available.
+- `enforce_on_startup`
+  Re-apply mappings during startup to handle lazy loading races.
+- `force_priority`
+  Allow gui-keymap to override conflicting default mappings.
+- `show_welcome`
+  Show the welcome message after first install or plugin version change.
+- `preserve_mode`
+  Return to the original mode for mappings that can safely preserve it.
 
 ==============================================================================
 3. Commands                                                 *gui-keymap-commands*
@@ -54,7 +91,11 @@ gui-keymap fallback clipboard handlers are used.
 - `:GuiKeymapEnable`
 - `:GuiKeymapDisable`
 - `:GuiKeymapList`
+  Opens a scratch buffer with active mappings.
+- `:GuiKeymapSkipped`
+  Opens a scratch buffer with skipped mappings.
 - `:GuiKeymapExplain <key>`
+  Opens a scratch buffer describing one mapping.
 - `:GuiKeymapRefresh`
 - `:GuiKeymapHintReset`
 - `:checkhealth gui-keymap`
