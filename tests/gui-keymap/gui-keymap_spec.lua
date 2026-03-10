@@ -25,9 +25,15 @@ describe("gui-keymap setup", function()
     assert.are.same(true, opts.delete_selection)
     assert.are.same(true, opts.shift_selection)
     assert.are.same(true, opts.word_delete)
+    assert.are.same(true, opts.save)
+    assert.are.same(true, opts.quit)
+    assert.are.same(true, opts.home_end)
     assert.are.same(true, opts.yanky_integration)
     assert.are.same(true, opts.hint_enabled)
     assert.are.same(3, opts.hint_repeat)
+    assert.are.same(true, opts.hint_persist)
+    assert.are.same(true, opts.hint_features.save)
+    assert.are.same(false, opts.hint_features.quit)
     assert.are.same(true, opts.enforce_on_startup)
     assert.are.same(true, opts.force_priority)
     assert.are.same(false, opts.show_welcome)
@@ -109,6 +115,19 @@ describe("gui-keymap setup", function()
     assert.is_true(map_present("i", "<C-a>"))
   end)
 
+  it("applies save, quit, and home/end mappings", function()
+    plugin.setup({ show_welcome = false })
+
+    assert.is_true(map_present("n", "<C-s>"))
+    assert.is_true(map_present("i", "<C-s>"))
+    assert.is_true(map_present("n", "<C-q>"))
+    assert.is_true(map_present("i", "<C-q>"))
+    assert.is_true(map_present("n", "<Home>"))
+    assert.is_true(map_present("n", "<End>"))
+    assert.is_true(map_present("i", "<Home>"))
+    assert.is_true(map_present("i", "<End>"))
+  end)
+
   it("keeps default clipboard toggles when config is partial", function()
     local opts = plugin.setup({
       clipboard = { copy = false },
@@ -124,15 +143,23 @@ describe("gui-keymap setup", function()
     local opts = plugin.setup({
       hint_repeat = "bad",
       force_priority = "bad",
+      hint_persist = "bad",
+      save = "bad",
       clipboard = {
         copy = "bad",
         paste = true,
+      },
+      hint_features = {
+        save = "bad",
       },
       show_welcome = false,
     })
 
     assert.are.same(3, opts.hint_repeat)
     assert.are.same(true, opts.force_priority)
+    assert.are.same(true, opts.hint_persist)
+    assert.are.same(true, opts.save)
+    assert.are.same(true, opts.hint_features.save)
     assert.are.same(true, opts.clipboard.copy)
     assert.are.same(true, opts.clipboard.paste)
     assert.are.same(true, opts.clipboard.cut)
@@ -177,6 +204,18 @@ describe("gui-keymap setup", function()
 
     assert.is_true(#state.requested_maps >= #state.active_maps)
   end)
+
+  it("loads persisted hint counts when enabled", function()
+    local hint_file = vim.fn.stdpath("state") .. "/gui-keymap-hints.json"
+    vim.fn.mkdir(vim.fn.fnamemodify(hint_file, ":h"), "p")
+    vim.fn.writefile({ vim.json.encode({ counts = { save = 4 } }) }, hint_file)
+
+    plugin.setup({ show_welcome = false, hint_persist = true })
+
+    assert.are.same(4, state.hint_counts.save)
+
+    vim.fn.delete(hint_file)
+  end)
 end)
 
 describe("gui-keymap demo", function()
@@ -192,6 +231,8 @@ describe("gui-keymap demo", function()
     local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
     assert.is_true(#lines > 0)
     assert.are.same("gui-keymap.nvim demo", lines[1])
+    assert.is_true(vim.tbl_contains(lines, "Ctrl+S  -> Save"))
+    assert.is_true(vim.tbl_contains(lines, "Ctrl+Q  -> Close window or buffer"))
     assert.is_true(vim.tbl_contains(lines, "Ctrl+Backspace -> Delete previous word"))
     assert.is_true(vim.tbl_contains(lines, "Ctrl+Delete -> Delete next word"))
   end)

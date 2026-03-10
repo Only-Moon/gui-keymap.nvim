@@ -3,6 +3,7 @@ local M = {
   config = {},
   active_maps = {},
   conflicts = {},
+  conflict_features = {},
   requested_maps = {},
   skipped_maps = {},
   fallback_maps = {},
@@ -31,6 +32,7 @@ end
 function M.clear_session()
   M.active_maps = {}
   M.conflicts = {}
+  M.conflict_features = {}
   M.requested_maps = {}
   M.skipped_maps = {}
   M.fallback_maps = {}
@@ -50,6 +52,7 @@ end
 function M.clear_maps()
   M.active_maps = {}
   M.conflicts = {}
+  M.conflict_features = {}
   M.requested_maps = {}
   M.skipped_maps = {}
   M.fallback_maps = {}
@@ -67,12 +70,13 @@ function M.register_requested_map(mode, key, desc, feature)
   })
 end
 
-function M.register_skipped_map(mode, key, desc, reason)
+function M.register_skipped_map(mode, key, desc, reason, feature)
   table.insert(M.skipped_maps, {
     mode = mode,
     lhs = key,
     desc = desc or "",
     reason = reason or "conflict",
+    feature = feature or "",
   })
 end
 
@@ -105,14 +109,19 @@ function M.register_map(mode, key, desc, feature)
   })
 end
 
-function M.add_conflict(mode, key, requested_desc, existing)
+function M.add_conflict(mode, key, requested_desc, existing, feature)
   table.insert(M.conflicts, {
     mode = mode,
     lhs = key,
     requested_desc = requested_desc or "",
     existing_desc = (existing and existing.desc) or "",
     existing_rhs = (existing and existing.rhs) or "",
+    feature = feature or "",
   })
+
+  if feature and feature ~= "" then
+    M.conflict_features[feature] = (M.conflict_features[feature] or 0) + 1
+  end
 end
 
 function M.get_active_maps()

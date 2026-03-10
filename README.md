@@ -22,9 +22,10 @@ On first install/update, the plugin also shows a one-time welcome notification.
 ## Features
 
 - GUI-style shortcuts for copy, paste, cut, select all, undo, redo
+- GUI-style save, quit, home, and end mappings
 - Shift + Arrow selection behavior
 - GUI-style word deletion (`<C-BS>`, `<C-Del>`)
-- Context-aware adaptive Vim hints (session-only)
+- Context-aware adaptive Vim hints with optional persisted counts
 - Safe keymap registration with conflict tracking
 - Demo buffer for safe testing
 - Runtime enable / disable / refresh controls
@@ -42,6 +43,10 @@ On first install/update, the plugin also shows a one-time welcome notification.
 | Ctrl+A | Select All | `ggVG` |
 | Ctrl+Z | Undo | `u` |
 | Ctrl+Y | Redo | `<C-r>` |
+| Ctrl+S | Save | `:write` |
+| Ctrl+Q | Close window or buffer | `:close` / `:bdelete` |
+| Home | Move to line start | `0` |
+| End | Move to line end | `$` |
 | Ctrl+Backspace | Delete previous word | `db` |
 | Ctrl+Delete | Delete next word | `dw` |
 
@@ -129,9 +134,22 @@ require("gui-keymap").setup({
   delete_selection = true,
   shift_selection = true,
   word_delete = true,
+  save = true,
+  quit = true,
+  home_end = true,
   yanky_integration = true,
   hint_enabled = true,
   hint_repeat = 3,
+  hint_persist = true,
+  hint_features = {
+    clipboard = true,
+    undo_redo = true,
+    select_all = true,
+    word_delete = true,
+    save = true,
+    quit = false,
+    home_end = false,
+  },
   which_key_integration = true,
   enforce_on_startup = true,
   force_priority = true,
@@ -152,9 +170,14 @@ If you do not pass `opts`, these defaults are used automatically.
 | `delete_selection` | `true` | Enable visual-mode `<BS>` and `<Del>` black-hole delete mappings. |
 | `shift_selection` | `true` | Enable Shift+Arrow selection mappings and terminal fallbacks. |
 | `word_delete` | `true` | Enable `Ctrl+Backspace` and `Ctrl+Delete` word deletion mappings. |
+| `save` | `true` | Enable `Ctrl+S` save mappings. |
+| `quit` | `true` | Enable `Ctrl+Q` close-window-or-buffer mappings. |
+| `home_end` | `true` | Enable `Home` / `End` line movement mappings. |
 | `yanky_integration` | `true` | Prefer Yanky-backed clipboard behavior when Yanky is installed. |
 | `hint_enabled` | `true` | Show adaptive Vim learning hints for GUI shortcuts. |
 | `hint_repeat` | `3` | Maximum hint displays per shortcut in one session. Use `-1` to always show hints. |
+| `hint_persist` | `true` | Persist hint counters across Neovim restarts using the Neovim state directory. |
+| `hint_features` | feature table | Enable or disable hints per feature without disabling the mappings themselves. |
 | `which_key_integration` | `true` | Register active mappings with `which-key.nvim` when available. |
 | `enforce_on_startup` | `true` | Re-apply mappings during startup to handle lazy-loading race conditions. |
 | `force_priority` | `true` | Allow gui-keymap to overwrite conflicting non-user default mappings. |
@@ -187,6 +210,12 @@ For Yanky it distinguishes:
 - not installed
 - installed but lazy-not-loaded
 - loaded in current session
+
+It also reports:
+- conflict counts by feature
+- terminal-sensitive mappings
+- fallback mappings
+- hint persistence and per-feature hint toggles
 
 ## Compatibility Notes
 

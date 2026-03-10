@@ -4,6 +4,24 @@ local utils = require("gui-keymap.utils")
 
 local M = {}
 
+local function save_buffer()
+  vim.cmd("silent! update")
+end
+
+local function save_buffer_insert()
+  save_buffer()
+  vim.cmd("startinsert")
+end
+
+local function quit_current()
+  local closed = pcall(vim.cmd, "confirm close")
+  if closed then
+    return
+  end
+
+  pcall(vim.cmd, "confirm bdelete")
+end
+
 ---@class GuiKeymapDefinition
 ---@field feature string
 ---@field mode string|string[]
@@ -61,7 +79,6 @@ M.registry = {
     hint_key = "redo",
     preserve_mode = true,
   },
-
   {
     feature = "clipboard",
     toggle = "copy",
@@ -117,7 +134,6 @@ M.registry = {
     hint_key = "paste",
     preserve_mode = true,
   },
-
   {
     feature = "select_all",
     force = true,
@@ -138,7 +154,6 @@ M.registry = {
     hint_key = "select_all",
     preserve_mode = false,
   },
-
   {
     feature = "delete_selection",
     force = true,
@@ -157,7 +172,6 @@ M.registry = {
     desc = "gui-keymap: Delete selection",
     preserve_mode = false,
   },
-
   {
     feature = "shift_selection",
     force = true,
@@ -365,7 +379,6 @@ M.registry = {
     desc = "gui-keymap: Select down",
     preserve_mode = false,
   },
-
   {
     feature = "shift_selection",
     force = true,
@@ -415,6 +428,116 @@ M.registry = {
     hint_key = "delete_next_word",
     preserve_mode = true,
   },
+  {
+    feature = "save",
+    force = true,
+    mode = "n",
+    lhs = "<C-s>",
+    rhs = save_buffer,
+    desc = "gui-keymap: Save buffer",
+    hint_key = "save",
+    preserve_mode = true,
+  },
+  {
+    feature = "save",
+    force = true,
+    mode = "i",
+    lhs = "<C-s>",
+    rhs = save_buffer_insert,
+    desc = "gui-keymap: Save buffer",
+    hint_key = "save",
+    preserve_mode = false,
+  },
+  {
+    feature = "save",
+    force = true,
+    mode = "x",
+    lhs = "<C-s>",
+    rhs = save_buffer,
+    desc = "gui-keymap: Save buffer",
+    hint_key = "save",
+    preserve_mode = true,
+  },
+  {
+    feature = "quit",
+    force = true,
+    mode = "n",
+    lhs = "<C-q>",
+    rhs = quit_current,
+    desc = "gui-keymap: Close window or buffer",
+    hint_key = "quit",
+    preserve_mode = false,
+  },
+  {
+    feature = "quit",
+    force = true,
+    mode = "i",
+    lhs = "<C-q>",
+    rhs = quit_current,
+    desc = "gui-keymap: Close window or buffer",
+    hint_key = "quit",
+    preserve_mode = false,
+  },
+  {
+    feature = "home_end",
+    force = true,
+    mode = "n",
+    lhs = "<Home>",
+    rhs = "0",
+    desc = "gui-keymap: Line start",
+    hint_key = "home",
+    preserve_mode = true,
+  },
+  {
+    feature = "home_end",
+    force = true,
+    mode = "n",
+    lhs = "<End>",
+    rhs = "$",
+    desc = "gui-keymap: Line end",
+    hint_key = "end",
+    preserve_mode = true,
+  },
+  {
+    feature = "home_end",
+    force = true,
+    mode = "x",
+    lhs = "<Home>",
+    rhs = "0",
+    desc = "gui-keymap: Line start",
+    hint_key = "home",
+    preserve_mode = false,
+  },
+  {
+    feature = "home_end",
+    force = true,
+    mode = "x",
+    lhs = "<End>",
+    rhs = "$",
+    desc = "gui-keymap: Line end",
+    hint_key = "end",
+    preserve_mode = false,
+  },
+  {
+    feature = "home_end",
+    force = true,
+    mode = "i",
+    lhs = "<Home>",
+    rhs = "<C-o>0",
+    desc = "gui-keymap: Line start",
+    hint_key = "home",
+    preserve_mode = true,
+  },
+  {
+    feature = "home_end",
+    force = true,
+    mode = "i",
+    lhs = "<End>",
+    rhs = "<C-o>$",
+    desc = "gui-keymap: Line end",
+    hint_key = "end",
+    preserve_mode = true,
+  },
 }
 
 M.explain = {
@@ -426,6 +549,10 @@ M.explain = {
   ["<C-y>"] = { gui = "<C-r>", vim = "<C-r>" },
   ["<C-BS>"] = { gui = "db", vim = "db" },
   ["<C-Del>"] = { gui = "dw", vim = "dw" },
+  ["<C-s>"] = { gui = ":write", vim = ":write / :w" },
+  ["<C-q>"] = { gui = ":close / :bdelete", vim = ":close / :bdelete" },
+  ["<Home>"] = { gui = "0", vim = "0" },
+  ["<End>"] = { gui = "$", vim = "$" },
 }
 
 ---@param opts GuiKeymapOptions
@@ -481,11 +608,7 @@ end
 ---@param item GuiKeymapDefinition
 ---@return string|function
 local function with_mode_restore(rhs, opts, item)
-  if not opts.preserve_mode then
-    return rhs
-  end
-
-  if item.preserve_mode == false then
+  if not opts.preserve_mode or item.preserve_mode == false then
     return rhs
   end
 
@@ -521,6 +644,7 @@ local function apply_main_registry(opts)
       if item.feature == "shift_selection" or item.lhs:match("^<S%-") or item.lhs:match("^<k[LRUD]>$") then
         utils.mark_terminal_sensitive(item.mode, item.lhs)
       end
+
       local rhs = with_mode_restore(item.rhs, opts, item)
       rhs = hints.wrap(item.mode, rhs, item.hint_key)
       utils.safe_map(

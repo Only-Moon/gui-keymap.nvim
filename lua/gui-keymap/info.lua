@@ -2,6 +2,16 @@ local utils = require("gui-keymap.utils")
 
 local M = {}
 
+local function sorted_summary(summary)
+  local lines = {}
+  local keys = vim.tbl_keys(summary)
+  table.sort(keys)
+  for _, key in ipairs(keys) do
+    table.insert(lines, string.format("- %s: %d", key, summary[key]))
+  end
+  return lines
+end
+
 ---@param opts GuiKeymapOptions
 ---@return string[]
 local function build_lines(opts)
@@ -41,6 +51,16 @@ local function build_lines(opts)
     )
   end
 
+  local summary = utils.get_conflict_summary()
+  table.insert(lines, "")
+  table.insert(lines, "Conflict summary by feature:")
+  local summary_lines = sorted_summary(summary)
+  if #summary_lines == 0 then
+    table.insert(lines, "- none")
+  else
+    vim.list_extend(lines, summary_lines)
+  end
+
   table.insert(lines, "")
   table.insert(lines, "Fallback mappings: " .. tostring(#state.fallback_maps))
   for _, mapping in ipairs(state.fallback_maps) do
@@ -66,8 +86,23 @@ local function build_lines(opts)
   table.insert(lines, "which-key integration: " .. (state.which_key_available and "available" or "not installed"))
   table.insert(
     lines,
-    "Hints: " .. ((opts.hint_enabled and "enabled") or "disabled") .. string.format(" (repeat: %d)", opts.hint_repeat)
+    "Hints: "
+      .. ((opts.hint_enabled and "enabled") or "disabled")
+      .. string.format(" (repeat: %d, persist: %s)", opts.hint_repeat, opts.hint_persist and "yes" or "no")
   )
+
+  table.insert(lines, "Hint feature toggles:")
+  local hint_lines = {}
+  local hint_keys = vim.tbl_keys(opts.hint_features or {})
+  table.sort(hint_keys)
+  for _, key in ipairs(hint_keys) do
+    table.insert(hint_lines, string.format("- %s: %s", key, opts.hint_features[key] and "on" or "off"))
+  end
+  if #hint_lines == 0 then
+    table.insert(lines, "- none")
+  else
+    vim.list_extend(lines, hint_lines)
+  end
 
   return lines
 end

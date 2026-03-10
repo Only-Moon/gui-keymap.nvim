@@ -44,8 +44,8 @@ function M.safe_map(mode, lhs, rhs, opts, feature, force)
     local has_existing = type(existing) == "table" and next(existing) ~= nil
 
     if has_existing and not is_builtin_default(existing) and not force then
-      state.add_conflict(current_mode, lhs, desc, existing)
-      state.register_skipped_map(current_mode, lhs, desc, "conflict")
+      state.add_conflict(current_mode, lhs, desc, existing, feature)
+      state.register_skipped_map(current_mode, lhs, desc, "conflict", feature)
     else
       vim.keymap.set(current_mode, lhs, rhs, final_opts)
       state.register_map(current_mode, lhs, desc, feature)
@@ -136,6 +136,17 @@ function M.get_conflicts()
   end
 
   return filtered
+end
+
+function M.get_conflict_summary()
+  local summary = {}
+
+  for _, conflict in ipairs(M.get_conflicts()) do
+    local feature = conflict.feature ~= "" and conflict.feature or "unknown"
+    summary[feature] = (summary[feature] or 0) + 1
+  end
+
+  return summary
 end
 
 return M

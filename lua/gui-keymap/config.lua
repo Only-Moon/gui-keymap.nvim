@@ -12,9 +12,14 @@ local M = {}
 ---@field delete_selection boolean
 ---@field shift_selection boolean
 ---@field word_delete boolean
+---@field save boolean
+---@field quit boolean
+---@field home_end boolean
 ---@field yanky_integration boolean
 ---@field hint_enabled boolean
 ---@field hint_repeat integer
+---@field hint_persist boolean
+---@field hint_features table<string, boolean>|nil
 ---@field which_key_integration boolean
 ---@field enforce_on_startup boolean
 ---@field force_priority boolean
@@ -38,9 +43,22 @@ M.defaults = {
   delete_selection = true,
   shift_selection = true,
   word_delete = true,
+  save = true,
+  quit = true,
+  home_end = true,
   yanky_integration = true,
   hint_enabled = true,
   hint_repeat = 3,
+  hint_persist = true,
+  hint_features = {
+    clipboard = true,
+    undo_redo = true,
+    select_all = true,
+    word_delete = true,
+    save = true,
+    quit = false,
+    home_end = false,
+  },
   which_key_integration = true,
   enforce_on_startup = true,
   force_priority = true,
@@ -79,7 +97,15 @@ end
 ---@param merged GuiKeymapOptions
 local function sanitize(merged)
   for key, default in pairs(M.defaults) do
-    if key ~= "clipboard" and key ~= "copy" and key ~= "paste" and key ~= "cut" and key ~= "undo" and key ~= "redo" then
+    if
+      key ~= "clipboard"
+      and key ~= "hint_features"
+      and key ~= "copy"
+      and key ~= "paste"
+      and key ~= "cut"
+      and key ~= "undo"
+      and key ~= "redo"
+    then
       if type(default) == "boolean" and type(merged[key]) ~= "boolean" then
         merged[key] = default
       end
@@ -99,6 +125,16 @@ local function sanitize(merged)
   if type(merged.hint_repeat) ~= "number" or (merged.hint_repeat < 0 and merged.hint_repeat ~= -1) then
     merged.hint_repeat = M.defaults.hint_repeat
   end
+
+  if type(merged.hint_features) ~= "table" then
+    merged.hint_features = vim.deepcopy(M.defaults.hint_features)
+  end
+
+  for key, default in pairs(M.defaults.hint_features) do
+    if type(merged.hint_features[key]) ~= "boolean" then
+      merged.hint_features[key] = default
+    end
+  end
 end
 
 ---@param user_opts GuiKeymapOptions|nil
@@ -116,8 +152,12 @@ local boolean_fields = {
   "delete_selection",
   "shift_selection",
   "word_delete",
+  "save",
+  "quit",
+  "home_end",
   "yanky_integration",
   "hint_enabled",
+  "hint_persist",
   "which_key_integration",
   "enforce_on_startup",
   "force_priority",
@@ -152,6 +192,16 @@ function M.validate(opts)
 
   if type(opts.hint_repeat) ~= "number" or (opts.hint_repeat < 0 and opts.hint_repeat ~= -1) then
     table.insert(errors, "hint_repeat must be -1 (always) or a non-negative number")
+  end
+
+  if type(opts.hint_features) ~= "table" then
+    table.insert(errors, "hint_features must be a table of booleans")
+  else
+    for key, enabled in pairs(opts.hint_features) do
+      if type(enabled) ~= "boolean" then
+        table.insert(errors, "hint_features." .. key .. " must be boolean")
+      end
+    end
   end
 
   return errors

@@ -66,6 +66,12 @@ function M.check()
   if #conflicts == 0 then
     ok("no keymap conflicts detected")
   else
+    local summary = utils.get_conflict_summary()
+    local summary_keys = vim.tbl_keys(summary)
+    table.sort(summary_keys)
+    for _, feature in ipairs(summary_keys) do
+      warn(string.format("conflicts for feature %s: %d", feature, summary[feature]))
+    end
     for _, conflict in ipairs(conflicts) do
       warn(string.format("keymap conflict for %s in mode %s", conflict.lhs, conflict.mode))
     end
@@ -101,6 +107,16 @@ function M.check()
 
   if #state.terminal_sensitive > 0 then
     info(string.format("%d terminal-sensitive mappings detected", #state.terminal_sensitive))
+  end
+
+  if plugin.options.hint_enabled then
+    info(
+      string.format(
+        "hints enabled (repeat %d, persist %s)",
+        plugin.options.hint_repeat,
+        plugin.options.hint_persist and "yes" or "no"
+      )
+    )
   end
 end
 
