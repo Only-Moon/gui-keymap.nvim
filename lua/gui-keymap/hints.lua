@@ -111,7 +111,7 @@ local function now_ms()
 end
 
 local function normalized_mode(mode)
-  if mode == "v" or mode == "V" or mode == "\22" then
+  if mode == "v" or mode == "V" or mode == "\22" or mode == "s" or mode == "S" or mode == "\19" then
     return "visual"
   end
   if mode == "n" then

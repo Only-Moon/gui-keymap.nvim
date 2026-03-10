@@ -40,6 +40,10 @@ local function select_all_insert()
   select_all_normal()
 end
 
+local function select_all_visual()
+  vim.api.nvim_feedkeys(termcodes("<Esc>ggVG"), "n", false)
+end
+
 local function undo_normal()
   vim.cmd.undo()
 end
@@ -117,7 +121,7 @@ M.registry = {
     feature = "clipboard",
     toggle = "copy",
     force = true,
-    mode = "x",
+    mode = "v",
     lhs = "<C-c>",
     rhs = clipboard.copy_selection,
     desc = "gui-keymap: Copy selection",
@@ -139,7 +143,7 @@ M.registry = {
     feature = "clipboard",
     toggle = "cut",
     force = true,
-    mode = "x",
+    mode = "v",
     lhs = "<C-x>",
     rhs = clipboard.cut_selection,
     desc = "gui-keymap: Cut selection",
@@ -181,6 +185,16 @@ M.registry = {
   {
     feature = "select_all",
     force = true,
+    mode = "v",
+    lhs = "<C-a>",
+    rhs = select_all_visual,
+    desc = "gui-keymap: Select all",
+    hint_key = "select_all",
+    preserve_mode = false,
+  },
+  {
+    feature = "select_all",
+    force = true,
     mode = "i",
     lhs = "<C-a>",
     rhs = select_all_insert,
@@ -191,7 +205,7 @@ M.registry = {
   {
     feature = "delete_selection",
     force = true,
-    mode = "x",
+    mode = "v",
     lhs = "<BS>",
     rhs = clipboard.delete_selection_blackhole,
     desc = "gui-keymap: Delete selection",
@@ -200,7 +214,7 @@ M.registry = {
   {
     feature = "delete_selection",
     force = true,
-    mode = "x",
+    mode = "v",
     lhs = "<Del>",
     rhs = clipboard.delete_selection_blackhole,
     desc = "gui-keymap: Delete selection",
@@ -281,7 +295,7 @@ M.registry = {
   {
     feature = "shift_selection",
     force = true,
-    mode = "x",
+    mode = "v",
     lhs = "<S-Left>",
     rhs = "<Left>",
     desc = "gui-keymap: Expand selection left",
@@ -290,7 +304,7 @@ M.registry = {
   {
     feature = "shift_selection",
     force = true,
-    mode = "x",
+    mode = "v",
     lhs = "<kL>",
     rhs = "<Left>",
     desc = "gui-keymap: Expand selection left (terminal fallback)",
@@ -299,7 +313,7 @@ M.registry = {
   {
     feature = "shift_selection",
     force = true,
-    mode = "x",
+    mode = "v",
     lhs = "<S-Right>",
     rhs = "<Right>",
     desc = "gui-keymap: Expand selection right",
@@ -308,7 +322,7 @@ M.registry = {
   {
     feature = "shift_selection",
     force = true,
-    mode = "x",
+    mode = "v",
     lhs = "<kR>",
     rhs = "<Right>",
     desc = "gui-keymap: Expand selection right (terminal fallback)",
@@ -317,7 +331,7 @@ M.registry = {
   {
     feature = "shift_selection",
     force = true,
-    mode = "x",
+    mode = "v",
     lhs = "<S-Up>",
     rhs = "<Up>",
     desc = "gui-keymap: Expand selection up",
@@ -326,7 +340,7 @@ M.registry = {
   {
     feature = "shift_selection",
     force = true,
-    mode = "x",
+    mode = "v",
     lhs = "<kU>",
     rhs = "<Up>",
     desc = "gui-keymap: Expand selection up (terminal fallback)",
@@ -335,7 +349,7 @@ M.registry = {
   {
     feature = "shift_selection",
     force = true,
-    mode = "x",
+    mode = "v",
     lhs = "<S-Down>",
     rhs = "<Down>",
     desc = "gui-keymap: Expand selection down",
@@ -344,7 +358,7 @@ M.registry = {
   {
     feature = "shift_selection",
     force = true,
-    mode = "x",
+    mode = "v",
     lhs = "<kD>",
     rhs = "<Down>",
     desc = "gui-keymap: Expand selection down (terminal fallback)",
@@ -535,7 +549,7 @@ M.registry = {
   {
     feature = "home_end",
     force = true,
-    mode = "x",
+    mode = "v",
     lhs = "<Home>",
     rhs = "0",
     desc = "gui-keymap: Line start",
@@ -545,7 +559,7 @@ M.registry = {
   {
     feature = "home_end",
     force = true,
-    mode = "x",
+    mode = "v",
     lhs = "<End>",
     rhs = "$",
     desc = "gui-keymap: Line end",
