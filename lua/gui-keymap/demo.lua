@@ -45,16 +45,4 @@ function M.open()
   open_with_lines(demo_lines)
 end
 
-function M.showcase()
-  local lines = vim.deepcopy(demo_lines)
-  table.insert(lines, 2, "Interactive showcase: try keys and compare with :GuiKeymapInfo.")
-  table.insert(lines, "")
-  table.insert(lines, "Record demo GIF workflow:")
-  table.insert(lines, "1. asciinema rec demo.cast")
-  table.insert(lines, "2. Run :GuiKeymapDemo and test mappings")
-  table.insert(lines, "3. Stop recording with Ctrl+D")
-  table.insert(lines, "4. Convert cast to GIF (agg/asciicast2gif)")
-  open_with_lines(lines)
-end
-
 return M

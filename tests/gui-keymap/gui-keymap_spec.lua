@@ -95,6 +95,43 @@ describe("gui-keymap setup", function()
     assert.is_true(map_present("n", "<C-a>"))
     assert.is_true(map_present("i", "<C-a>"))
   end)
+
+  it("keeps default clipboard toggles when config is partial", function()
+    local opts = plugin.setup({
+      clipboard = { copy = false },
+      show_welcome = false,
+    })
+
+    assert.are.same(false, opts.clipboard.copy)
+    assert.are.same(true, opts.clipboard.paste)
+    assert.are.same(true, opts.clipboard.cut)
+  end)
+
+  it("works when yanky and which-key are absent", function()
+    local original_yanky = package.loaded["yanky"]
+    local original_which_key = package.loaded["which-key"]
+    package.loaded["yanky"] = nil
+    package.loaded["which-key"] = nil
+
+    plugin.setup({ show_welcome = false })
+
+    local runtime = state
+    assert.are.same(false, runtime.yanky_loaded)
+    assert.are.same(false, runtime.which_key_available)
+
+    package.loaded["yanky"] = original_yanky
+    package.loaded["which-key"] = original_which_key
+  end)
+
+  it("registers end-user commands from plugin loader", function()
+    vim.cmd("runtime plugin/gui-keymap.lua")
+
+    assert.are.same(2, vim.fn.exists(":GuiKeymapDemo"))
+    assert.are.same(2, vim.fn.exists(":GuiKeymapEnable"))
+    assert.are.same(2, vim.fn.exists(":GuiKeymapDisable"))
+    assert.are.same(2, vim.fn.exists(":GuiKeymapList"))
+    assert.are.same(2, vim.fn.exists(":GuiKeymapExplain"))
+  end)
 end)
 
 describe("gui-keymap demo", function()
@@ -112,16 +149,5 @@ describe("gui-keymap demo", function()
     assert.are.same("gui-keymap.nvim demo", lines[1])
     assert.is_true(vim.tbl_contains(lines, "Ctrl+Backspace -> Delete previous word"))
     assert.is_true(vim.tbl_contains(lines, "Ctrl+Delete -> Delete next word"))
-  end)
-
-  it("opens showcase scratch demo buffer", function()
-    require("gui-keymap.demo").showcase()
-
-    local buf = vim.api.nvim_get_current_buf()
-    assert.are.same("nofile", vim.bo[buf].buftype)
-    assert.are.same("gui-keymap-demo", vim.bo[buf].filetype)
-
-    local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
-    assert.is_true(vim.tbl_contains(lines, "Interactive showcase: try keys and compare with :GuiKeymapInfo."))
   end)
 end)

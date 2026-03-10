@@ -13,10 +13,6 @@ function M.setup()
     require("gui-keymap.demo").open()
   end, { desc = "Open gui-keymap demo buffer" })
 
-  vim.api.nvim_create_user_command("GuiKeymapShowcase", function()
-    require("gui-keymap.demo").showcase()
-  end, { desc = "Open gui-keymap showcase buffer" })
-
   vim.api.nvim_create_user_command("GuiKeymapInfo", function()
     plugin.show_info()
   end, { desc = "Show gui-keymap diagnostics" })

@@ -50,7 +50,6 @@ gui-keymap fallback clipboard handlers are used.
 3. Commands                                                 *gui-keymap-commands*
 
 - `:GuiKeymapDemo`
-- `:GuiKeymapShowcase`
 - `:GuiKeymapInfo`
 - `:GuiKeymapEnable`
 - `:GuiKeymapDisable`

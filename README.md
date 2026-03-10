@@ -2,6 +2,11 @@
 
 Use familiar GUI shortcuts in Neovim while learning native Vim commands.
 
+## Requirements
+
+- Neovim >= 0.8.0
+- Not supported on classic Vim (non-Neovim)
+
 ## Demo
 
 Run `:GuiKeymapDemo` to open a safe scratch buffer and test GUI-style shortcuts without touching your files.
@@ -21,7 +26,7 @@ On first install/update, the plugin also shows a one-time welcome notification.
 - GUI-style word deletion (`<C-BS>`, `<C-Del>`)
 - Context-aware adaptive Vim hints (session-only)
 - Safe keymap registration with conflict tracking
-- Demo and showcase buffers
+- Demo buffer for safe testing
 - Runtime enable / disable / refresh controls
 - `:GuiKeymapInfo` diagnostics and `:checkhealth gui-keymap`
 - Optional `which-key.nvim` integration
@@ -122,7 +127,6 @@ require("gui-keymap").setup({
 | Command | Description |
 |--------|-------------|
 | `:GuiKeymapDemo` | Open safe demo buffer |
-| `:GuiKeymapShowcase` | Open demo showcase with recording tips |
 | `:GuiKeymapInfo` | Show plugin diagnostics summary |
 | `:GuiKeymapEnable` | Enable GUI mappings |
 | `:GuiKeymapDisable` | Disable GUI mappings |
