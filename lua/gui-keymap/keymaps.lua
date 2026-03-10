@@ -4,6 +4,10 @@ local utils = require("gui-keymap.utils")
 
 local M = {}
 
+local function termcodes(keys)
+  return vim.api.nvim_replace_termcodes(keys, true, false, true)
+end
+
 local function save_buffer()
   vim.cmd("silent! update")
 end
@@ -14,14 +18,42 @@ local function save_buffer_insert()
 end
 
 local function quit_current()
-  pcall(vim.cmd, "silent! update")
-
-  local closed = pcall(vim.cmd, "confirm close")
-  if closed then
+  if vim.bo.buftype ~= "" then
+    pcall(vim.cmd, "confirm quit")
     return
   end
 
-  pcall(vim.cmd, "confirm bdelete")
+  pcall(vim.cmd, "confirm wq")
+end
+
+local function quit_current_insert()
+  vim.cmd("stopinsert")
+  quit_current()
+end
+
+local function select_all_normal()
+  vim.cmd.normal({ args = { "ggVG" }, bang = true })
+end
+
+local function select_all_insert()
+  vim.cmd("stopinsert")
+  select_all_normal()
+end
+
+local function undo_normal()
+  vim.cmd.undo()
+end
+
+local function redo_normal()
+  vim.cmd.redo()
+end
+
+local function undo_insert()
+  vim.api.nvim_feedkeys(termcodes("<C-o>u"), "n", false)
+end
+
+local function redo_insert()
+  vim.api.nvim_feedkeys(termcodes("<C-o><C-r>"), "n", false)
 end
 
 ---@class GuiKeymapDefinition
@@ -43,10 +75,10 @@ M.registry = {
     force = true,
     mode = "n",
     lhs = "<C-z>",
-    rhs = "u",
+    rhs = undo_normal,
     desc = "gui-keymap: Undo",
     hint_key = "undo",
-    preserve_mode = true,
+    preserve_mode = false,
   },
   {
     feature = "undo_redo",
@@ -54,10 +86,10 @@ M.registry = {
     force = true,
     mode = "n",
     lhs = "<C-y>",
-    rhs = "<C-r>",
+    rhs = redo_normal,
     desc = "gui-keymap: Redo",
     hint_key = "redo",
-    preserve_mode = true,
+    preserve_mode = false,
   },
   {
     feature = "undo_redo",
@@ -65,10 +97,10 @@ M.registry = {
     force = true,
     mode = "i",
     lhs = "<C-z>",
-    rhs = "<C-o>u",
+    rhs = undo_insert,
     desc = "gui-keymap: Undo",
     hint_key = "undo",
-    preserve_mode = true,
+    preserve_mode = false,
   },
   {
     feature = "undo_redo",
@@ -76,10 +108,10 @@ M.registry = {
     force = true,
     mode = "i",
     lhs = "<C-y>",
-    rhs = "<C-o><C-r>",
+    rhs = redo_insert,
     desc = "gui-keymap: Redo",
     hint_key = "redo",
-    preserve_mode = true,
+    preserve_mode = false,
   },
   {
     feature = "clipboard",
@@ -141,7 +173,7 @@ M.registry = {
     force = true,
     mode = "n",
     lhs = "<C-a>",
-    rhs = "ggVG",
+    rhs = select_all_normal,
     desc = "gui-keymap: Select all",
     hint_key = "select_all",
     preserve_mode = false,
@@ -151,7 +183,7 @@ M.registry = {
     force = true,
     mode = "i",
     lhs = "<C-a>",
-    rhs = "<Esc>ggVG",
+    rhs = select_all_insert,
     desc = "gui-keymap: Select all",
     hint_key = "select_all",
     preserve_mode = false,
@@ -466,7 +498,7 @@ M.registry = {
     mode = "n",
     lhs = "<C-q>",
     rhs = quit_current,
-    desc = "gui-keymap: Save and close window or buffer",
+    desc = "gui-keymap: Save and quit current file",
     hint_key = "quit",
     preserve_mode = false,
   },
@@ -475,8 +507,8 @@ M.registry = {
     force = true,
     mode = "i",
     lhs = "<C-q>",
-    rhs = quit_current,
-    desc = "gui-keymap: Save and close window or buffer",
+    rhs = quit_current_insert,
+    desc = "gui-keymap: Save and quit current file",
     hint_key = "quit",
     preserve_mode = false,
   },
@@ -552,7 +584,7 @@ M.explain = {
   ["<C-BS>"] = { gui = "db", vim = "db" },
   ["<C-Del>"] = { gui = "dw", vim = "dw" },
   ["<C-s>"] = { gui = ":write", vim = ":write / :w" },
-  ["<C-q>"] = { gui = ":update + :close / :bdelete", vim = ":wq / :update | close" },
+  ["<C-q>"] = { gui = ":confirm wq", vim = ":wq" },
   ["<Home>"] = { gui = "0", vim = "0" },
   ["<End>"] = { gui = "$", vim = "$" },
 }
@@ -600,39 +632,24 @@ local function normalize_mode(mode)
   return mode
 end
 
-local function escape_to_normal()
-  local esc = vim.api.nvim_replace_termcodes("<Esc>", true, false, true)
-  vim.api.nvim_feedkeys(esc, "n", false)
-end
-
+---@param mode string|string[]
 ---@param rhs string|function
----@param opts GuiKeymapOptions
----@param item GuiKeymapDefinition
 ---@return string|function
-local function with_mode_restore(rhs, opts, item)
-  if not opts.preserve_mode or item.preserve_mode == false then
+local function materialize_rhs(mode, rhs)
+  if type(rhs) == "function" then
     return rhs
   end
 
-  return function(...)
-    local original_mode = normalize_mode(vim.api.nvim_get_mode().mode)
+  local current_mode = type(mode) == "table" and mode[1] or mode
+  current_mode = normalize_mode(current_mode)
 
-    if type(rhs) == "function" then
-      rhs(...)
-    else
-      local keys = vim.api.nvim_replace_termcodes(rhs, true, false, true)
-      vim.api.nvim_feedkeys(keys, "n", false)
+  return function()
+    if current_mode == "n" then
+      vim.cmd.normal({ args = { rhs }, bang = true })
+      return
     end
 
-    vim.schedule(function()
-      if original_mode == "i" then
-        vim.cmd("startinsert")
-      elseif original_mode == "n" then
-        escape_to_normal()
-      elseif original_mode == "x" then
-        vim.cmd("normal! gv")
-      end
-    end)
+    vim.api.nvim_feedkeys(termcodes(rhs), "n", false)
   end
 end
 
@@ -647,7 +664,7 @@ local function apply_main_registry(opts)
         utils.mark_terminal_sensitive(item.mode, item.lhs)
       end
 
-      local rhs = with_mode_restore(item.rhs, opts, item)
+      local rhs = materialize_rhs(item.mode, item.rhs)
       rhs = hints.wrap(item.mode, rhs, item.hint_key)
       utils.safe_map(
         item.mode,

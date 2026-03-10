@@ -80,9 +80,9 @@ local templates = {
   },
   quit = {
     default = {
-      "Saved and closed the current window or buffer.",
-      "Vim workflow: :update, then :close or :bdelete.",
-      "Quick practice: try :wq or :update | close next time.",
+      "Saved and quit. Vim equivalent: :wq",
+      "You can save and quit with :wq.",
+      "Quick practice: try :wq next time.",
     },
   },
   home = {

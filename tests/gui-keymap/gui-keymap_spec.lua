@@ -1,11 +1,18 @@
 local hints = require("gui-keymap.hints")
 local plugin = require("gui-keymap")
 local state = require("gui-keymap.state")
+local clipboard = require("gui-keymap.clipboard")
 local utils = require("gui-keymap.utils")
 
 local function map_present(mode, lhs)
   local mapping = vim.fn.maparg(lhs, mode, false, true)
   return type(mapping) == "table" and next(mapping) ~= nil
+end
+
+local function invoke_map(mode, lhs)
+  local mapping = vim.fn.maparg(lhs, mode, false, true)
+  assert.is_truthy(mapping.callback)
+  mapping.callback()
 end
 
 describe("gui-keymap setup", function()
@@ -126,6 +133,49 @@ describe("gui-keymap setup", function()
     assert.is_true(map_present("i", "<End>"))
   end)
 
+  it("selects all in normal mode via Ctrl+A", function()
+    plugin.setup({ show_welcome = false })
+    vim.cmd("enew")
+    vim.api.nvim_buf_set_lines(0, 0, -1, false, { "one", "two", "three" })
+    vim.api.nvim_win_set_cursor(0, { 2, 1 })
+
+    invoke_map("n", "<C-a>")
+
+    assert.are.same("V", vim.api.nvim_get_mode().mode)
+    assert.are.same(3, vim.api.nvim_win_get_cursor(0)[1])
+  end)
+
+  it("falls back to built-in clipboard paste when yanky is not ready", function()
+    plugin.setup({ show_welcome = false, yanky_integration = true })
+    package.loaded["yanky"] = {}
+    state.yanky_checked = false
+
+    vim.cmd("enew")
+    vim.api.nvim_buf_set_lines(0, 0, -1, false, { "alpha" })
+    vim.api.nvim_win_set_cursor(0, { 1, 5 })
+    vim.fn.setreg("+", " beta", "v")
+
+    invoke_map("n", "<C-v>")
+
+    assert.are.same("alpha beta", vim.api.nvim_get_current_line())
+    package.loaded["yanky"] = nil
+  end)
+
+  it("clipboard module pastes without yanky plug mappings", function()
+    plugin.setup({ show_welcome = false, yanky_integration = true })
+    package.loaded["yanky"] = {}
+    state.yanky_checked = false
+
+    vim.cmd("enew")
+    vim.api.nvim_buf_set_lines(0, 0, -1, false, { "alpha" })
+    vim.api.nvim_win_set_cursor(0, { 1, 5 })
+    vim.fn.setreg("+", " beta", "v")
+    clipboard.paste_normal()
+
+    assert.are.same("alpha beta", vim.api.nvim_get_current_line())
+    package.loaded["yanky"] = nil
+  end)
+
   it("keeps default clipboard toggles when config is partial", function()
     local opts = plugin.setup({
       clipboard = { copy = false },
@@ -226,7 +276,7 @@ describe("gui-keymap demo", function()
     assert.is_true(#lines > 0)
     assert.are.same("gui-keymap.nvim demo", lines[1])
     assert.is_true(vim.tbl_contains(lines, "Ctrl+S  -> Save"))
-    assert.is_true(vim.tbl_contains(lines, "Ctrl+Q  -> Save and close window or buffer"))
+    assert.is_true(vim.tbl_contains(lines, "Ctrl+Q  -> Save and quit current file"))
     assert.is_true(vim.tbl_contains(lines, "Ctrl+Backspace -> Delete previous word"))
     assert.is_true(vim.tbl_contains(lines, "Ctrl+Delete -> Delete next word"))
   end)

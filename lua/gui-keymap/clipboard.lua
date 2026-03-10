@@ -24,26 +24,29 @@ local function yanky_runtime_installed()
     or #vim.api.nvim_get_runtime_file("lua/yanky/init.lua", false) > 0
 end
 
+local function yanky_mapping_ready(lhs, mode)
+  return vim.fn.maparg(lhs, mode) ~= ""
+end
+
 function M.ensure_yanky_loaded()
   local state = utils.get_state()
+  local enabled = state.config.yanky_integration == true
 
-  if package.loaded["yanky"] ~= nil then
-    utils.set_yanky_status(true, true, state.config.yanky_integration == true)
+  if package.loaded["yanky"] ~= nil and yanky_mapping_ready("<Plug>(YankyPutAfter)", "n") then
+    utils.set_yanky_status(true, true, enabled)
     state.yanky_checked = true
     return true
   end
 
   if not yanky_runtime_installed() then
-    utils.set_yanky_status(false, false, state.config.yanky_integration == true)
+    utils.set_yanky_status(false, false, enabled)
     state.yanky_checked = true
     return false
   end
 
-  pcall(require, "yanky")
-  local loaded = package.loaded["yanky"] ~= nil
-  utils.set_yanky_status(true, loaded, state.config.yanky_integration == true)
+  utils.set_yanky_status(true, false, enabled)
   state.yanky_checked = true
-  return loaded
+  return false
 end
 
 local function sync_unnamed_from_plus()
