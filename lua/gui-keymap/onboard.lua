@@ -49,6 +49,14 @@ local function show_and_persist()
   write_state({ version = current_identity(), shown_at = os.time() })
 end
 
+local function uses_lazy()
+  if package.loaded["lazy"] ~= nil then
+    return true
+  end
+
+  return #vim.api.nvim_get_runtime_file("lua/lazy/init.lua", false) > 0
+end
+
 function M.setup(opts)
   if opts.show_welcome ~= true then
     return
@@ -70,19 +78,27 @@ function M.setup(opts)
   if vim.v.vim_did_enter == 1 then
     if package.loaded["notify"] ~= nil or package.loaded["snacks"] ~= nil then
       vim.schedule(once_show)
-    else
+    elseif not uses_lazy() then
       vim.defer_fn(once_show, 400)
+    else
+      vim.defer_fn(once_show, 1200)
     end
     return
   end
 
   local group = vim.api.nvim_create_augroup("GuiKeymapOnboard", { clear = true })
-  vim.api.nvim_create_autocmd("User", {
-    group = group,
-    pattern = { "VeryLazy", "LazyDone" },
-    once = true,
-    callback = once_show,
-  })
+  if uses_lazy() then
+    vim.api.nvim_create_autocmd("User", {
+      group = group,
+      pattern = { "VeryLazy", "LazyDone" },
+      once = true,
+      callback = function()
+        vim.defer_fn(once_show, 150)
+      end,
+    })
+    return
+  end
+
   vim.api.nvim_create_autocmd("VimEnter", {
     group = group,
     once = true,
