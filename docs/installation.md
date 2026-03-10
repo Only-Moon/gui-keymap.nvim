@@ -1,0 +1,83 @@
+---
+layout: default
+title: Installation
+---
+
+# Installation
+
+## Requirements
+
+- Neovim `>= 0.8.0`
+- Classic Vim is not supported
+
+## lazy.nvim
+
+```lua
+{
+  "Only-Moon/gui-keymap.nvim",
+  opts = {},
+}
+```
+
+## packer.nvim
+
+```lua
+use({
+  "Only-Moon/gui-keymap.nvim",
+  config = function()
+    require("gui-keymap").setup({})
+  end,
+})
+```
+
+## vim-plug
+
+```vim
+Plug 'Only-Moon/gui-keymap.nvim'
+```
+
+Then:
+
+```lua
+require("gui-keymap").setup({})
+```
+
+## Native packages
+
+```sh
+git clone https://github.com/Only-Moon/gui-keymap.nvim \
+  ~/.local/share/nvim/site/pack/gui/start/gui-keymap.nvim
+```
+
+Then:
+
+```lua
+require("gui-keymap").setup({})
+```
+
+## LuaRocks
+
+```sh
+luarocks install gui-keymap.nvim
+```
+
+Then:
+
+```lua
+require("gui-keymap").setup({})
+```
+
+## First-run flow
+
+If welcome notifications are enabled, the plugin shows a one-time onboarding
+message after a fresh install or after the plugin version changes.
+
+## Verify installation
+
+Inside Neovim:
+
+```vim
+:GuiKeymapDemo
+:GuiKeymapInfo
+:checkhealth gui-keymap
+```

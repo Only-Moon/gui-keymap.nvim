@@ -91,19 +91,6 @@ local function build_lines(opts)
       .. string.format(" (repeat: %d, persist: %s)", opts.hint_repeat, opts.hint_persist and "yes" or "no")
   )
 
-  table.insert(lines, "Hint feature toggles:")
-  local hint_lines = {}
-  local hint_keys = vim.tbl_keys(opts.hint_features or {})
-  table.sort(hint_keys)
-  for _, key in ipairs(hint_keys) do
-    table.insert(hint_lines, string.format("- %s: %s", key, opts.hint_features[key] and "on" or "off"))
-  end
-  if #hint_lines == 0 then
-    table.insert(lines, "- none")
-  else
-    vim.list_extend(lines, hint_lines)
-  end
-
   return lines
 end
 

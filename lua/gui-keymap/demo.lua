@@ -14,7 +14,7 @@ local demo_lines = {
   "Ctrl+Z  -> Undo",
   "Ctrl+Y  -> Redo",
   "Ctrl+S  -> Save",
-  "Ctrl+Q  -> Close window or buffer",
+  "Ctrl+Q  -> Save and close window or buffer",
   "Ctrl+Backspace -> Delete previous word",
   "Ctrl+Delete -> Delete next word",
   "Home / End -> Move to line start / line end",

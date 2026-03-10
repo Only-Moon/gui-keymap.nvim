@@ -32,8 +32,6 @@ describe("gui-keymap setup", function()
     assert.are.same(true, opts.hint_enabled)
     assert.are.same(3, opts.hint_repeat)
     assert.are.same(true, opts.hint_persist)
-    assert.are.same(true, opts.hint_features.save)
-    assert.are.same(false, opts.hint_features.quit)
     assert.are.same(true, opts.enforce_on_startup)
     assert.are.same(true, opts.force_priority)
     assert.are.same(false, opts.show_welcome)
@@ -149,9 +147,6 @@ describe("gui-keymap setup", function()
         copy = "bad",
         paste = true,
       },
-      hint_features = {
-        save = "bad",
-      },
       show_welcome = false,
     })
 
@@ -159,7 +154,6 @@ describe("gui-keymap setup", function()
     assert.are.same(true, opts.force_priority)
     assert.are.same(true, opts.hint_persist)
     assert.are.same(true, opts.save)
-    assert.are.same(true, opts.hint_features.save)
     assert.are.same(true, opts.clipboard.copy)
     assert.are.same(true, opts.clipboard.paste)
     assert.are.same(true, opts.clipboard.cut)
@@ -232,7 +226,7 @@ describe("gui-keymap demo", function()
     assert.is_true(#lines > 0)
     assert.are.same("gui-keymap.nvim demo", lines[1])
     assert.is_true(vim.tbl_contains(lines, "Ctrl+S  -> Save"))
-    assert.is_true(vim.tbl_contains(lines, "Ctrl+Q  -> Close window or buffer"))
+    assert.is_true(vim.tbl_contains(lines, "Ctrl+Q  -> Save and close window or buffer"))
     assert.is_true(vim.tbl_contains(lines, "Ctrl+Backspace -> Delete previous word"))
     assert.is_true(vim.tbl_contains(lines, "Ctrl+Delete -> Delete next word"))
   end)

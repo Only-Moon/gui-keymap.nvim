@@ -14,6 +14,8 @@ local function save_buffer_insert()
 end
 
 local function quit_current()
+  pcall(vim.cmd, "silent! update")
+
   local closed = pcall(vim.cmd, "confirm close")
   if closed then
     return
@@ -464,7 +466,7 @@ M.registry = {
     mode = "n",
     lhs = "<C-q>",
     rhs = quit_current,
-    desc = "gui-keymap: Close window or buffer",
+    desc = "gui-keymap: Save and close window or buffer",
     hint_key = "quit",
     preserve_mode = false,
   },
@@ -474,7 +476,7 @@ M.registry = {
     mode = "i",
     lhs = "<C-q>",
     rhs = quit_current,
-    desc = "gui-keymap: Close window or buffer",
+    desc = "gui-keymap: Save and close window or buffer",
     hint_key = "quit",
     preserve_mode = false,
   },
@@ -550,7 +552,7 @@ M.explain = {
   ["<C-BS>"] = { gui = "db", vim = "db" },
   ["<C-Del>"] = { gui = "dw", vim = "dw" },
   ["<C-s>"] = { gui = ":write", vim = ":write / :w" },
-  ["<C-q>"] = { gui = ":close / :bdelete", vim = ":close / :bdelete" },
+  ["<C-q>"] = { gui = ":update + :close / :bdelete", vim = ":wq / :update | close" },
   ["<Home>"] = { gui = "0", vim = "0" },
   ["<End>"] = { gui = "$", vim = "$" },
 }

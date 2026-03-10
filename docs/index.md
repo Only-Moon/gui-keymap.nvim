@@ -7,23 +7,37 @@ title: gui-keymap.nvim
 
 Use familiar GUI shortcuts in Neovim while learning native Vim commands.
 
+## Documentation
+
+- [Installation](./installation)
+- [Configuration Reference](./configuration)
+- [Keymaps and Behavior](./keymaps)
+- [Commands and Diagnostics](./commands)
+- [Troubleshooting](./troubleshooting)
+
+## What this plugin does
+
+`gui-keymap.nvim` adds a compatibility layer for users moving from GUI editors
+such as VSCode, Sublime Text, or JetBrains IDEs.
+
+It provides:
+
+- copy, paste, cut, select all, undo, redo
+- save and save-and-close shortcuts
+- Home/End line movement
+- Shift+Arrow selection
+- word deletion with `Ctrl+Backspace` and `Ctrl+Delete`
+- optional Vim learning hints
+- conflict detection and diagnostics
+
+## Start here
+
+1. Install the plugin.
+2. Run `:GuiKeymapDemo`.
+3. Test the shortcuts in the scratch buffer.
+4. Open `:GuiKeymapInfo` if something does not behave as expected.
+
+## Project links
+
 - Repository: [Only-Moon/gui-keymap.nvim](https://github.com/Only-Moon/gui-keymap.nvim)
-- README: [View installation, configuration, and commands](https://github.com/Only-Moon/gui-keymap.nvim#readme)
-
-## What it provides
-
-- GUI-style copy, paste, cut, select-all, undo, and redo mappings
-- Shift+Arrow selection helpers
-- Word deletion shortcuts with `Ctrl+Backspace` and `Ctrl+Delete`
-- Optional adaptive hints for Vim equivalents
-- Diagnostics via `:GuiKeymapInfo` and `:checkhealth gui-keymap`
-
-## Quick start
-
-Install the plugin, then run:
-
-```vim
-:GuiKeymapDemo
-```
-
-This opens a scratch buffer where you can test the mappings safely.
+- README: [GitHub README](https://github.com/Only-Moon/gui-keymap.nvim#readme)
