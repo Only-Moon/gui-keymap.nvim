@@ -1,6 +1,15 @@
 ---
-on: [push, pull_request]
 name: lint-test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   stylua:
@@ -28,6 +37,18 @@ jobs:
       - name: Run luacheck
         run: luacheck lua plugin tests
 
+  luarocks:
+    name: luarocks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leafo/gh-actions-lua@v10
+        with:
+          luaVersion: "5.1"
+      - uses: leafo/gh-actions-luarocks@v4
+      - name: Build rockspec
+        run: luarocks make gui-keymap.nvim-scm-1.rockspec
+
   test:
     runs-on: ubuntu-latest
     strategy:
@@ -45,3 +66,6 @@ jobs:
 
       - name: run tests
         run: make test
+
+      - name: run smoke checks
+        run: make smoke
