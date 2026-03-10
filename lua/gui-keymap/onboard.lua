@@ -3,6 +3,10 @@ local M = {}
 local version = require("gui-keymap.version")
 local STATE_FILE = vim.fn.stdpath("state") .. "/gui-keymap-onboard.json"
 
+local function current_identity()
+  return version.identity()
+end
+
 local function read_state()
   if vim.fn.filereadable(STATE_FILE) ~= 1 then
     return {}
@@ -33,7 +37,7 @@ end
 
 local function should_show_welcome()
   local state = read_state()
-  return state.version ~= version.current
+  return state.version ~= current_identity()
 end
 
 local function show_and_persist()
@@ -42,7 +46,7 @@ local function show_and_persist()
     vim.log.levels.INFO,
     { title = "gui-keymap" }
   )
-  write_state({ version = version.current, shown_at = os.time() })
+  write_state({ version = current_identity(), shown_at = os.time() })
 end
 
 function M.setup(opts)
