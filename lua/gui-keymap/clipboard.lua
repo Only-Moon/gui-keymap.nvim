@@ -136,7 +136,8 @@ local function probe_yanky(load_if_needed)
       return true
     end
 
-    installed, loaded, source = detect_yanky_installation()
+    local _, detected_loaded, detected_source = detect_yanky_installation()
+    loaded, source = detected_loaded, detected_source
   end
 
   update_status(true, true, loaded, loaded and "loaded-not-ready" or "installed-not-loaded", source)

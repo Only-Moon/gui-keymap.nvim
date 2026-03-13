@@ -66,7 +66,7 @@ local function byte_to_char(text, idx)
 end
 
 local function apply_line_edit(start_char, finish_char, target_mode)
-  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+  local row = vim.api.nvim_win_get_cursor(0)[1]
   local line = vim.api.nvim_get_current_line()
   local before = vim.fn.strcharpart(line, 0, start_char)
   local after = vim.fn.strcharpart(line, finish_char)
@@ -85,7 +85,7 @@ end
 
 local function delete_previous_word_gui(target_mode)
   local line = vim.api.nvim_get_current_line()
-  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+  local col = vim.api.nvim_win_get_cursor(0)[2]
   local caret_char = byte_to_char(line, col)
 
   if target_mode == "n" and str_char_count(line) > 0 then
@@ -706,15 +706,6 @@ local function item_enabled(opts, item)
   return true
 end
 
----@param mode string
----@return string
-local function normalize_mode(mode)
-  if mode == "v" or mode == "V" or mode == "\22" then
-    return "x"
-  end
-  return mode
-end
-
 local function expand_modes(mode)
   if type(mode) == "table" then
     return mode
@@ -722,10 +713,9 @@ local function expand_modes(mode)
   return { mode }
 end
 
----@param mode string|string[]
 ---@param rhs string|function
 ---@return string|function
-local function materialize_rhs(mode, rhs)
+local function materialize_rhs(rhs)
   if type(rhs) == "function" then
     return rhs
   end
@@ -744,7 +734,7 @@ local function apply_main_registry(opts)
         utils.mark_terminal_sensitive(item.mode, item.lhs)
       end
 
-      local rhs = materialize_rhs(item.mode, item.rhs)
+      local rhs = materialize_rhs(item.rhs)
       local hint_opts
       rhs, hint_opts = hints.wrap(item.mode, rhs, item.hint_key)
       utils.safe_map(
