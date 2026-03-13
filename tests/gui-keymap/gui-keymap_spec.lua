@@ -357,6 +357,21 @@ describe("gui-keymap setup", function()
     assert.is_true(map_present("n", "<C-v>"))
   end)
 
+  it("maps Ctrl+Z immediately when the plugin loader runs", function()
+    local commands = require("gui-keymap.commands")
+    local gui_keymap = require("gui-keymap")
+
+    utils.clear_plugin_maps()
+    gui_keymap._setup_done = false
+    commands._registered = false
+    vim.g.loaded_gui_keymap = nil
+
+    vim.cmd("runtime plugin/gui-keymap.lua")
+
+    assert.is_true(map_present("n", "<C-z>"))
+    assert.is_true(map_present("i", "<C-z>"))
+  end)
+
   it("provides generated explain keys", function()
     plugin.setup({ show_welcome = false })
 
