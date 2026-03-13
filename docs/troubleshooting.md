@@ -1,8 +1,3 @@
----
-layout: default
-title: Troubleshooting
----
-
 # Troubleshooting
 
 ## `Ctrl+Y` does not redo
@@ -34,9 +29,8 @@ The plugin treats `Ctrl+Q` as save-and-close, not a raw `:quit`.
 
 Behavior:
 
-1. tries to save with `:update`
-2. tries to close the current window
-3. falls back to deleting the current buffer
+1. saves pending changes
+2. runs `:confirm wq`
 
 If a terminal intercepts `Ctrl+Q`, the key may never reach Neovim.
 

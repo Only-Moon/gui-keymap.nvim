@@ -1,8 +1,3 @@
----
-layout: default
-title: Configuration
----
-
 # Configuration Reference
 
 ## Default configuration
@@ -88,7 +83,7 @@ Enables:
 - `Ctrl+Backspace`
 - `Ctrl+Delete`
 
-Mapped to Vim-native word deletion behavior.
+Mapped to GUI-style word deletion behavior that avoids polluting clipboard state.
 
 ### `save`
 
@@ -102,16 +97,12 @@ Modes:
 
 ### `quit`
 
-Enables `Ctrl+Q` to save and close the current window or buffer.
+Enables `Ctrl+Q` to save and close the current file.
 
 Behavior:
 
-1. tries `:update`
-2. tries `:confirm close`
-3. falls back to `:confirm bdelete`
-
-This is intentionally closer to GUI “save and close document” behavior than a
-raw quit.
+1. saves pending changes
+2. runs `:confirm wq`
 
 ### `home_end`
 

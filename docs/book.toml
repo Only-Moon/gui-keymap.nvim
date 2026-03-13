@@ -1,0 +1,16 @@
+[book]
+title = "gui-keymap.nvim"
+authors = ["Only-Moon"]
+description = "GUI-style keybindings for Neovim."
+language = "en"
+multilingual = false
+src = "."
+
+[build]
+build-dir = "book"
+
+[output.html]
+git-repository-url = "https://github.com/Only-Moon/gui-keymap.nvim"
+edit-url-template = "https://github.com/Only-Moon/gui-keymap.nvim/edit/main/docs/{path}"
+default-theme = "light"
+preferred-dark-theme = "navy"

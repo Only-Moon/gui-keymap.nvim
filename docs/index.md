@@ -1,8 +1,3 @@
----
-layout: default
-title: gui-keymap.nvim
----
-
 # gui-keymap.nvim
 
 Use familiar GUI shortcuts in Neovim while learning native Vim commands.

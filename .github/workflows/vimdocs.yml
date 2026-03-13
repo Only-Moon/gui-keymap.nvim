@@ -1,4 +1,4 @@
-name: docs
+name: vimdocs
 
 on:
   push:
@@ -6,28 +6,29 @@ on:
       - main
     paths:
       - "README.md"
-      - "doc/**"
+      - "docs/**"
       - "lua/**"
       - "plugin/**"
-      - ".github/workflows/docs.yml"
+      - ".github/workflows/vimdocs.yml"
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  docs:
+  vimdocs:
+    name: Build vimdoc
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: panvimdoc
+      - name: Generate vimdoc
         uses: kdheepak/panvimdoc@main
         with:
           vimdoc: gui-keymap
           version: "Neovim >= 0.8.0"
           demojify: true
           treesitter: true
-      - name: Push changes
+      - name: Push generated vimdoc
         uses: stefanzweifel/git-auto-commit-action@v6
         with:
           commit_message: "chore(ci): auto-generate vimdoc"

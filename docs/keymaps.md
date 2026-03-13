@@ -1,8 +1,3 @@
----
-layout: default
-title: Keymaps
----
-
 # Keymaps and Behavior
 
 ## GUI shortcut table
@@ -23,18 +18,18 @@ title: Keymaps
 | `Ctrl+S` | normal | save buffer | `:write` |
 | `Ctrl+S` | insert | save buffer | `:write` |
 | `Ctrl+S` | visual | save buffer | `:write` |
-| `Ctrl+Q` | normal | save and close | `:wq` / `:update \| close` |
-| `Ctrl+Q` | insert | save and close | `:wq` / `:update \| close` |
+| `Ctrl+Q` | normal | save and close | `:confirm wq` |
+| `Ctrl+Q` | insert | save and close | `:confirm wq` |
 | `Home` | normal | line start | `0` |
 | `Home` | insert | line start | `<C-o>0` |
 | `Home` | visual | line start | `0` |
 | `End` | normal | line end | `$` |
 | `End` | insert | line end | `<C-o>$` |
 | `End` | visual | line end | `$` |
-| `Ctrl+Backspace` | normal | delete previous word | `db` |
-| `Ctrl+Backspace` | insert | delete previous word | `<C-o>db` |
-| `Ctrl+Delete` | normal | delete next word | `dw` |
-| `Ctrl+Delete` | insert | delete next word | `<C-o>dw` |
+| `Ctrl+Backspace` | normal | delete previous word | GUI-style previous-word delete |
+| `Ctrl+Backspace` | insert | delete previous word | GUI-style previous-word delete |
+| `Ctrl+Delete` | normal | delete next word | GUI-style next-word delete |
+| `Ctrl+Delete` | insert | delete next word | GUI-style next-word delete |
 
 ## Delete-selection mappings
 
@@ -87,16 +82,7 @@ Saves the current buffer with `:update`.
 
 ### `Ctrl+Q`
 
-`Ctrl+Q` is treated as a GUI-style save-and-close action.
-
-Implementation order:
-
-1. `:update`
-2. `:confirm close`
-3. `:confirm bdelete`
-
-This avoids raw quit behavior and is closer to closing a document/window in a
-GUI editor.
+`Ctrl+Q` is treated as a GUI-style save-and-close action and runs `:confirm wq`.
 
 ## Mode preservation
 

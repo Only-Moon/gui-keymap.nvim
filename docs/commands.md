@@ -1,8 +1,3 @@
----
-layout: default
-title: Commands and Diagnostics
----
-
 # Commands and Diagnostics
 
 ## User commands
