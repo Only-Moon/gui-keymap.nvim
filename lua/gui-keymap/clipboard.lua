@@ -22,6 +22,22 @@ local function yanky_mapping_ready(lhs, mode)
   return vim.fn.maparg(lhs, mode) ~= ""
 end
 
+local clipboard_plus_available
+
+local function plus_register_available()
+  if clipboard_plus_available ~= nil then
+    return clipboard_plus_available
+  end
+
+  local probe = "gui-keymap-clipboard-probe"
+  local old_value = vim.fn.getreg("+")
+  local old_type = vim.fn.getregtype("+")
+  local ok = pcall(vim.fn.setreg, "+", probe, "v")
+  clipboard_plus_available = ok and vim.fn.getreg("+") == probe
+  pcall(vim.fn.setreg, "+", old_value, old_type)
+  return clipboard_plus_available
+end
+
 local function yanky_ready()
   return package.loaded["yanky"] ~= nil and yanky_mapping_ready("<Plug>(YankyPutAfter)", "n")
 end
@@ -145,6 +161,9 @@ local function probe_yanky(load_if_needed)
 end
 
 local function sync_unnamed_from_plus()
+  if not plus_register_available() then
+    return
+  end
   local plus = vim.fn.getreg("+")
   if plus == "" then
     return
@@ -153,6 +172,9 @@ local function sync_unnamed_from_plus()
 end
 
 local function sync_plus_from_unnamed()
+  if not plus_register_available() then
+    return
+  end
   local unnamed = vim.fn.getreg('"')
   if unnamed == "" then
     return
@@ -172,8 +194,12 @@ function M.copy_selection()
     sync_plus_from_unnamed()
     return
   end
-  feed_visual('"+y')
-  sync_unnamed_from_plus()
+  if plus_register_available() then
+    feed_visual('"+y')
+    sync_unnamed_from_plus()
+    return
+  end
+  feed_visual("y")
 end
 
 function M.copy_line()
@@ -182,8 +208,12 @@ function M.copy_line()
     sync_plus_from_unnamed()
     return
   end
-  run_normal('"+yy')
-  sync_unnamed_from_plus()
+  if plus_register_available() then
+    run_normal('"+yy')
+    sync_unnamed_from_plus()
+    return
+  end
+  run_normal("yy")
 end
 
 function M.cut_selection()
@@ -192,8 +222,12 @@ function M.cut_selection()
     sync_plus_from_unnamed()
     return
   end
-  feed_visual('"+d')
-  sync_unnamed_from_plus()
+  if plus_register_available() then
+    feed_visual('"+d')
+    sync_unnamed_from_plus()
+    return
+  end
+  feed_visual("d")
 end
 
 function M.paste_normal()
@@ -201,7 +235,7 @@ function M.paste_normal()
     feed("<Plug>(YankyPutAfter)")
     return
   end
-  if vim.fn.getreg("+") ~= "" then
+  if plus_register_available() and vim.fn.getreg("+") ~= "" then
     run_normal('"+p')
     return
   end
@@ -224,16 +258,24 @@ function M.paste_insert()
 end
 
 function M.delete_selection_blackhole()
-  local plus, plus_type = vim.fn.getreg("+"), vim.fn.getregtype("+")
-  local star, star_type = vim.fn.getreg("*"), vim.fn.getregtype("*")
+  local plus_available = plus_register_available()
+  local plus, plus_type = "", ""
+  local star, star_type = "", ""
+  if plus_available then
+    plus, plus_type = vim.fn.getreg("+"), vim.fn.getregtype("+")
+    star, star_type = vim.fn.getreg("*"), vim.fn.getregtype("*")
+  end
   feed_visual('"_d')
-  vim.fn.setreg("+", plus, plus_type)
-  vim.fn.setreg("*", star, star_type)
+  if plus_available then
+    vim.fn.setreg("+", plus, plus_type)
+    vim.fn.setreg("*", star, star_type)
+  end
 end
 
 function M.detect_status(enabled)
   local state = utils.get_state()
   state.reset_yanky_probe()
+  clipboard_plus_available = nil
   probe_yanky(false)
   if enabled ~= true then
     state.yanky_enabled = false

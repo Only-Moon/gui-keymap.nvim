@@ -15,12 +15,35 @@ local function invoke_map(mode, lhs)
   mapping.callback()
 end
 
+local function invoke_map_with_result(mode, lhs)
+  local mapping = vim.fn.maparg(lhs, mode, false, true)
+  assert.is_truthy(mapping.callback)
+  return mapping.callback()
+end
+
 local function termcodes(keys)
   return vim.api.nvim_replace_termcodes(keys, true, false, true)
 end
 
 local function press(keys, mode)
   vim.api.nvim_feedkeys(termcodes(keys), mode or "mx", false)
+end
+
+local function plus_register_available()
+  local probe = "gui-keymap-test-probe"
+  local old_value = vim.fn.getreg("+")
+  local old_type = vim.fn.getregtype("+")
+  local ok = pcall(vim.fn.setreg, "+", probe, "v")
+  local available = ok and vim.fn.getreg("+") == probe
+  pcall(vim.fn.setreg, "+", old_value, old_type)
+  return available
+end
+
+local function seed_clipboard_registers(value, regtype)
+  vim.fn.setreg('"', value, regtype or "v")
+  if plus_register_available() then
+    vim.fn.setreg("+", value, regtype or "v")
+  end
 end
 
 describe("gui-keymap setup", function()
@@ -188,7 +211,7 @@ describe("gui-keymap setup", function()
     vim.cmd("enew")
     vim.api.nvim_buf_set_lines(0, 0, -1, false, { "alpha" })
     vim.api.nvim_win_set_cursor(0, { 1, 5 })
-    vim.fn.setreg("+", " beta", "v")
+    seed_clipboard_registers(" beta", "v")
 
     invoke_map("n", "<C-v>")
 
@@ -204,7 +227,7 @@ describe("gui-keymap setup", function()
     vim.cmd("enew")
     vim.api.nvim_buf_set_lines(0, 0, -1, false, { "alpha" })
     vim.api.nvim_win_set_cursor(0, { 1, 5 })
-    vim.fn.setreg("+", " beta", "v")
+    seed_clipboard_registers(" beta", "v")
     clipboard.paste_normal()
 
     assert.are.same("alpha beta", vim.api.nvim_get_current_line())
@@ -487,13 +510,17 @@ describe("gui-keymap keycode mappings", function()
     vim.api.nvim_buf_set_lines(0, 0, -1, false, { "alpha beta" })
     vim.cmd("normal! 0ve")
     vim.fn.setreg('"', "")
-    vim.fn.setreg("+", "")
+    if plus_register_available() then
+      vim.fn.setreg("+", "")
+    end
 
     press("<C-c>")
 
     assert.are.same("alpha beta", vim.api.nvim_get_current_line())
-    assert.are.same("alpha", vim.fn.getreg("+"))
     assert.are.same("alpha", vim.fn.getreg('"'))
+    if plus_register_available() then
+      assert.are.same("alpha", vim.fn.getreg("+"))
+    end
   end)
 
   it("cuts only the selected text from visual mode without inserting literal text", function()
@@ -502,13 +529,17 @@ describe("gui-keymap keycode mappings", function()
     vim.api.nvim_buf_set_lines(0, 0, -1, false, { "alpha beta" })
     vim.cmd("normal! 0ve")
     vim.fn.setreg('"', "")
-    vim.fn.setreg("+", "")
+    if plus_register_available() then
+      vim.fn.setreg("+", "")
+    end
 
     press("<C-x>")
 
     assert.are.same(" beta", vim.api.nvim_get_current_line())
-    assert.are.same("alpha", vim.fn.getreg("+"))
     assert.are.same("alpha", vim.fn.getreg('"'))
+    if plus_register_available() then
+      assert.are.same("alpha", vim.fn.getreg("+"))
+    end
   end)
 
   it("uses yanky-ready visual clipboard mappings without corrupting the selection", function()
@@ -521,13 +552,17 @@ describe("gui-keymap keycode mappings", function()
     vim.api.nvim_buf_set_lines(0, 0, -1, false, { "alpha beta" })
     vim.cmd("normal! 0ve")
     vim.fn.setreg('"', "")
-    vim.fn.setreg("+", "")
+    if plus_register_available() then
+      vim.fn.setreg("+", "")
+    end
 
     press("<C-c>")
 
     assert.are.same("alpha beta", vim.api.nvim_get_current_line())
-    assert.are.same("alpha", vim.fn.getreg("+"))
     assert.are.same("alpha", vim.fn.getreg('"'))
+    if plus_register_available() then
+      assert.are.same("alpha", vim.fn.getreg("+"))
+    end
   end)
 
   it("keeps cut synced to unnamed and system clipboard without yanky", function()
@@ -536,13 +571,17 @@ describe("gui-keymap keycode mappings", function()
     vim.api.nvim_buf_set_lines(0, 0, -1, false, { "alpha beta" })
     vim.cmd("normal! 0ve")
     vim.fn.setreg('"', "")
-    vim.fn.setreg("+", "")
+    if plus_register_available() then
+      vim.fn.setreg("+", "")
+    end
 
     press("<C-x>")
 
     assert.are.same(" beta", vim.api.nvim_get_current_line())
-    assert.are.same("alpha", vim.fn.getreg("+"))
     assert.are.same("alpha", vim.fn.getreg('"'))
+    if plus_register_available() then
+      assert.are.same("alpha", vim.fn.getreg("+"))
+    end
   end)
 
   it("keeps cut synced to unnamed and system clipboard with yanky-ready mappings", function()
@@ -555,12 +594,152 @@ describe("gui-keymap keycode mappings", function()
     vim.api.nvim_buf_set_lines(0, 0, -1, false, { "alpha beta" })
     vim.cmd("normal! 0ve")
     vim.fn.setreg('"', "")
-    vim.fn.setreg("+", "")
+    if plus_register_available() then
+      vim.fn.setreg("+", "")
+    end
 
     press("<C-x>")
 
     assert.are.same(" beta", vim.api.nvim_get_current_line())
-    assert.are.same("alpha", vim.fn.getreg("+"))
     assert.are.same("alpha", vim.fn.getreg('"'))
+    if plus_register_available() then
+      assert.are.same("alpha", vim.fn.getreg("+"))
+    end
   end)
+end)
+
+describe("gui-keymap hints", function()
+  local original_notify
+
+  before_each(function()
+    original_notify = vim.notify
+    utils.clear_plugin_maps()
+    hints.reset()
+    state.hint_counts = {}
+    state.hint_last_ts = {}
+    plugin.setup({
+      show_welcome = false,
+      hint_enabled = true,
+      hint_repeat = -1,
+      hint_persist = false,
+      yanky_integration = false,
+    })
+  end)
+
+  after_each(function()
+    vim.notify = original_notify
+  end)
+
+  local function with_notify_capture(fn)
+    local messages = {}
+    vim.notify = function(msg, level, opts)
+      table.insert(messages, {
+        msg = msg,
+        level = level,
+        title = opts and opts.title or nil,
+      })
+    end
+
+    fn(messages)
+    vim.wait(50, function()
+      return #messages > 0
+    end)
+    return messages
+  end
+
+  local function prepare_for_mapping(mode, lhs)
+    vim.cmd("enew!")
+    vim.bo.buftype = "nofile"
+    vim.bo.bufhidden = "wipe"
+    vim.bo.swapfile = false
+    vim.bo.modified = false
+
+    if lhs == "<C-c>" and mode == "v" then
+      vim.api.nvim_buf_set_lines(0, 0, -1, false, { "alpha beta" })
+      vim.cmd("normal! 0ve")
+      return
+    end
+
+    if lhs == "<C-x>" and mode == "v" then
+      vim.api.nvim_buf_set_lines(0, 0, -1, false, { "alpha beta" })
+      vim.cmd("normal! 0ve")
+      return
+    end
+
+    if lhs == "<C-v>" and mode == "n" then
+      vim.api.nvim_buf_set_lines(0, 0, -1, false, { "alpha" })
+      vim.api.nvim_win_set_cursor(0, { 1, 5 })
+      seed_clipboard_registers(" beta", "v")
+      return
+    end
+
+    if lhs == "<C-v>" and mode == "i" then
+      vim.api.nvim_buf_set_lines(0, 0, -1, false, { "alpha" })
+      vim.api.nvim_win_set_cursor(0, { 1, 5 })
+      seed_clipboard_registers(" beta", "v")
+      return
+    end
+
+    if lhs == "<C-BS>" then
+      vim.api.nvim_buf_set_lines(0, 0, -1, false, { "hello world" })
+      vim.api.nvim_win_set_cursor(0, { 1, 11 })
+      return
+    end
+
+    if lhs == "<C-Del>" then
+      vim.api.nvim_buf_set_lines(0, 0, -1, false, { "hello cruel world" })
+      vim.api.nvim_win_set_cursor(0, { 1, 6 })
+      return
+    end
+
+    if lhs == "<C-a>" and mode == "v" then
+      vim.api.nvim_buf_set_lines(0, 0, -1, false, { "one", "two" })
+      vim.cmd("normal! v")
+      return
+    end
+
+    if lhs == "<C-s>" and mode == "x" then
+      vim.api.nvim_buf_set_lines(0, 0, -1, false, { "one" })
+      vim.cmd("normal! v")
+      return
+    end
+
+    if lhs == "<Home>" and mode == "v" then
+      vim.api.nvim_buf_set_lines(0, 0, -1, false, { "abc" })
+      vim.cmd("normal! lv")
+      return
+    end
+
+    if lhs == "<End>" and mode == "v" then
+      vim.api.nvim_buf_set_lines(0, 0, -1, false, { "abc" })
+      vim.cmd("normal! v")
+      return
+    end
+
+    vim.api.nvim_buf_set_lines(0, 0, -1, false, { "one", "two" })
+  end
+
+  for _, item in ipairs(require("gui-keymap.keymaps").registry) do
+    if item.hint_key then
+      local label = string.format(
+        "%s %s emits a hint",
+        type(item.mode) == "table" and table.concat(item.mode, ",") or item.mode,
+        item.lhs
+      )
+      it(label, function()
+        prepare_for_mapping(item.mode, item.lhs)
+
+        local messages = with_notify_capture(function()
+          local result = invoke_map_with_result(item.mode, item.lhs)
+          if type(result) == "string" and result ~= "" then
+            assert.is_true(#result > 0)
+          end
+        end)
+
+        assert.is_true(#messages > 0)
+        assert.are.same("gui-keymap", messages[1].title)
+        assert.is_true(type(messages[1].msg) == "string" and messages[1].msg ~= "")
+      end)
+    end
+  end
 end)
