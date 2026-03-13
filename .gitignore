@@ -2,3 +2,9 @@ vendor/plenary.nvim
 
 .nvimlog
 doc/tags
+
+AGENTS.md
+GEMINI.md
+IMPLEMENTATION_DRAFT.md
+BUG_REPORT.md
+TODO_INTERNAL.md
