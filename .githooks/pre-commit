@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root"
+
+echo "[gui-keymap] stylua --check lua plugin tests"
+npx @johnnymorganz/stylua-bin --check lua plugin tests
+
+if command -v wsl >/dev/null 2>&1; then
+  windows_root="$(pwd -W 2>/dev/null || pwd)"
+  wsl_root="$(wsl wslpath -a "$windows_root")"
+  echo "[gui-keymap] luacheck lua plugin tests (via WSL)"
+  wsl bash -lc "cd '$wsl_root' && luacheck lua plugin tests"
+elif command -v luacheck >/dev/null 2>&1; then
+  echo "[gui-keymap] luacheck lua plugin tests"
+  luacheck lua plugin tests
+else
+  echo "[gui-keymap] luacheck not found; skipping lint" >&2
+fi
