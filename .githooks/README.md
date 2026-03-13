@@ -7,7 +7,7 @@ It checks:
 - `npx @johnnymorganz/stylua-bin --check lua plugin tests`
 - `luacheck lua plugin tests`
 
-On Windows, the hook prefers `luacheck` through WSL when `wsl` is available.
+The hook runs `luacheck` in the first available environment.
 
 Enable it once per clone:
 
