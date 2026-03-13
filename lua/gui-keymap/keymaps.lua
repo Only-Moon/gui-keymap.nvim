@@ -39,6 +39,96 @@ local function select_all_insert()
   vim.api.nvim_feedkeys(termcodes("<Esc>ggVG"), "nx", false)
 end
 
+local keyword_pattern = vim.regex([[\k]])
+
+local function is_space(char)
+  return char ~= "" and char:match("%s") ~= nil
+end
+
+local function is_keyword(char)
+  return char ~= "" and keyword_pattern:match_str(char) ~= nil
+end
+
+local function str_char_at(text, idx)
+  return vim.fn.strcharpart(text, idx, 1)
+end
+
+local function str_char_count(text)
+  return vim.fn.strchars(text)
+end
+
+local function char_to_byte(text, idx)
+  return vim.str_byteindex(text, idx)
+end
+
+local function byte_to_char(text, idx)
+  return vim.str_utfindex(text, idx)
+end
+
+local function apply_line_edit(start_char, finish_char, target_mode)
+  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+  local line = vim.api.nvim_get_current_line()
+  local before = vim.fn.strcharpart(line, 0, start_char)
+  local after = vim.fn.strcharpart(line, finish_char)
+  local updated = before .. after
+
+  vim.api.nvim_set_current_line(updated)
+
+  local cursor_byte = char_to_byte(updated, start_char)
+  if target_mode == "n" then
+    local max_col = math.max(str_char_count(updated) - 1, 0)
+    cursor_byte = char_to_byte(updated, math.min(start_char, max_col))
+  end
+
+  vim.api.nvim_win_set_cursor(0, { row, cursor_byte })
+end
+
+local function delete_previous_word_gui(target_mode)
+  local line = vim.api.nvim_get_current_line()
+  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+  local caret_char = byte_to_char(line, col)
+
+  if target_mode == "n" and str_char_count(line) > 0 then
+    caret_char = math.min(caret_char + 1, str_char_count(line))
+  end
+
+  if caret_char <= 0 then
+    return
+  end
+
+  local start_char = caret_char
+
+  while start_char > 0 and is_space(str_char_at(line, start_char - 1)) do
+    start_char = start_char - 1
+  end
+
+  while start_char > 0 and is_keyword(str_char_at(line, start_char - 1)) do
+    start_char = start_char - 1
+  end
+
+  while start_char > 0 do
+    local char = str_char_at(line, start_char - 1)
+    if is_space(char) or is_keyword(char) then
+      break
+    end
+    start_char = start_char - 1
+  end
+
+  if start_char == caret_char then
+    return
+  end
+
+  apply_line_edit(start_char, caret_char, target_mode)
+end
+
+local function delete_prev_word_normal()
+  delete_previous_word_gui("n")
+end
+
+local function delete_prev_word_insert()
+  delete_previous_word_gui("i")
+end
+
 ---@class GuiKeymapDefinition
 ---@field feature string
 ---@field mode string|string[]
@@ -420,7 +510,7 @@ M.registry = {
     force = true,
     mode = "n",
     lhs = "<C-BS>",
-    rhs = "db",
+    rhs = delete_prev_word_normal,
     desc = "gui-keymap: Delete previous word",
     hint_key = "delete_prev_word",
     preserve_mode = true,
@@ -440,7 +530,7 @@ M.registry = {
     force = true,
     mode = "i",
     lhs = "<C-BS>",
-    rhs = "<C-o>db",
+    rhs = delete_prev_word_insert,
     desc = "gui-keymap: Delete previous word",
     hint_key = "delete_prev_word",
     preserve_mode = true,
@@ -574,7 +664,7 @@ M.explain = {
   ["<C-a>"] = { gui = "ggVG", vim = "ggVG" },
   ["<C-z>"] = { gui = "u", vim = "u" },
   ["<C-y>"] = { gui = "<C-r>", vim = "<C-r>" },
-  ["<C-BS>"] = { gui = "db", vim = "db" },
+  ["<C-BS>"] = { gui = "delete previous word", vim = "closest: <C-w> (insert) / db (normal)" },
   ["<C-Del>"] = { gui = "dw", vim = "dw" },
   ["<C-s>"] = { gui = ":write", vim = ":write / :w" },
   ["<C-q>"] = { gui = ":confirm wq", vim = ":wq" },
@@ -640,18 +730,7 @@ local function materialize_rhs(mode, rhs)
     return rhs
   end
 
-  local current_mode = type(mode) == "table" and mode[1] or mode
-  current_mode = normalize_mode(current_mode)
-  local has_keycodes = rhs:find("<", 1, true) ~= nil and rhs:find(">", 1, true) ~= nil
-
-  return function()
-    if current_mode == "n" and not has_keycodes then
-      vim.cmd.normal({ args = { rhs }, bang = true })
-      return
-    end
-
-    vim.api.nvim_feedkeys(termcodes(rhs), "nx", false)
-  end
+  return rhs
 end
 
 ---@param opts GuiKeymapOptions
@@ -666,12 +745,13 @@ local function apply_main_registry(opts)
       end
 
       local rhs = materialize_rhs(item.mode, item.rhs)
-      rhs = hints.wrap(item.mode, rhs, item.hint_key)
+      local hint_opts
+      rhs, hint_opts = hints.wrap(item.mode, rhs, item.hint_key)
       utils.safe_map(
         item.mode,
         item.lhs,
         rhs,
-        { desc = item.desc, silent = true, noremap = true },
+        vim.tbl_extend("force", { desc = item.desc, silent = true, noremap = true }, hint_opts or {}),
         item.feature,
         item.force and opts.force_priority
       )

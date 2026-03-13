@@ -59,9 +59,9 @@ local templates = {
   },
   delete_prev_word = {
     default = {
-      "Deleted previous word. Vim equivalent: db",
-      "You can use db to delete the previous word.",
-      "Quick practice: try db next time.",
+      "Deleted previous word.",
+      "Closest Vim equivalents are <C-w> in insert mode or db in normal mode.",
+      "Quick practice: try <C-w> in insert mode next time.",
     },
   },
   delete_next_word = {
@@ -231,23 +231,25 @@ end
 ---@param rhs string|function
 ---@param hint_key string|nil
 ---@return string|function
+---@return table|nil
 function M.wrap(mode, rhs, hint_key)
   if not M.enabled or not hint_key then
-    return rhs
+    return rhs, nil
   end
 
   if type(rhs) == "function" then
     return function(...)
       rhs(...)
       M.show(hint_key, type(mode) == "table" and mode[1] or mode)
-    end
+    end, nil
   end
 
   return function()
-    local keys = vim.api.nvim_replace_termcodes(rhs, true, false, true)
-    vim.api.nvim_feedkeys(keys, "n", false)
-    M.show(hint_key, type(mode) == "table" and mode[1] or mode)
-  end
+    vim.schedule(function()
+      M.show(hint_key, type(mode) == "table" and mode[1] or mode)
+    end)
+    return vim.api.nvim_replace_termcodes(rhs, true, false, true)
+  end, { expr = true }
 end
 
 ---@param opts GuiKeymapOptions

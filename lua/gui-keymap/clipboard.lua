@@ -7,7 +7,11 @@ local function termcodes(keys)
 end
 
 local function feed(keys)
-  vim.api.nvim_feedkeys(termcodes(keys), "m", false)
+  vim.api.nvim_feedkeys(termcodes(keys), "mx", false)
+end
+
+local function feed_visual(keys)
+  vim.api.nvim_feedkeys(termcodes(keys), "mx", false)
 end
 
 local function run_normal(keys)
@@ -167,7 +171,7 @@ function M.copy_selection()
     sync_plus_from_unnamed()
     return
   end
-  run_normal('"+y')
+  feed_visual('"+y')
   sync_unnamed_from_plus()
 end
 
@@ -183,12 +187,11 @@ end
 
 function M.cut_selection()
   if M.ensure_yanky_loaded() then
-    feed("<Plug>(YankyYank)")
-    run_normal([[gv"_d]])
+    feed_visual([[<Plug>(YankyYank)gv"_d]])
     sync_plus_from_unnamed()
     return
   end
-  run_normal('"+d')
+  feed_visual('"+d')
   sync_unnamed_from_plus()
 end
 
@@ -222,7 +225,7 @@ end
 function M.delete_selection_blackhole()
   local plus, plus_type = vim.fn.getreg("+"), vim.fn.getregtype("+")
   local star, star_type = vim.fn.getreg("*"), vim.fn.getregtype("*")
-  run_normal('"_d')
+  feed_visual('"_d')
   vim.fn.setreg("+", plus, plus_type)
   vim.fn.setreg("*", star, star_type)
 end

@@ -15,6 +15,14 @@ local function invoke_map(mode, lhs)
   mapping.callback()
 end
 
+local function termcodes(keys)
+  return vim.api.nvim_replace_termcodes(keys, true, false, true)
+end
+
+local function press(keys, mode)
+  vim.api.nvim_feedkeys(termcodes(keys), mode or "mx", false)
+end
+
 describe("gui-keymap setup", function()
   before_each(function()
     utils.clear_plugin_maps()
@@ -154,7 +162,7 @@ describe("gui-keymap setup", function()
     vim.api.nvim_buf_set_lines(0, 0, -1, false, { "one", "two", "three" })
     vim.api.nvim_win_set_cursor(0, { 2, 1 })
 
-    invoke_map("n", "<C-a>")
+    press("<C-a>")
 
     assert.are.same("V", vim.api.nvim_get_mode().mode)
     assert.are.same(3, vim.api.nvim_win_get_cursor(0)[1])
@@ -443,8 +451,116 @@ describe("gui-keymap keycode mappings", function()
     vim.api.nvim_buf_set_lines(0, 0, -1, false, { "one", "two" })
     vim.api.nvim_win_set_cursor(0, { 1, 1 })
 
-    invoke_map("n", "<S-Down>")
+    press("<S-Down>")
 
     assert.are.same({ "one", "two" }, vim.api.nvim_buf_get_lines(0, 0, -1, false))
+  end)
+
+  it("does not inject literal text for insert-mode shift selection mappings", function()
+    plugin.setup({ show_welcome = false })
+    vim.cmd("enew")
+    vim.api.nvim_buf_set_lines(0, 0, -1, false, { "one", "two" })
+    vim.api.nvim_win_set_cursor(0, { 1, 1 })
+    vim.cmd("startinsert")
+
+    press("<S-Down>")
+
+    assert.are.same({ "one", "two" }, vim.api.nvim_buf_get_lines(0, 0, -1, false))
+    assert.is_true(vim.api.nvim_get_mode().mode == "v" or vim.api.nvim_get_mode().mode == "V")
+  end)
+
+  it("does not inject literal text for insert-mode delete previous word", function()
+    plugin.setup({ show_welcome = false })
+    vim.cmd("enew")
+    vim.api.nvim_buf_set_lines(0, 0, -1, false, { "hello world" })
+    vim.api.nvim_win_set_cursor(0, { 1, 11 })
+    vim.cmd("startinsert")
+
+    press("<C-BS>")
+
+    assert.are.same("hello ", vim.api.nvim_get_current_line())
+  end)
+
+  it("copies the selected text from visual mode without corrupting the buffer", function()
+    plugin.setup({ show_welcome = false, yanky_integration = false })
+    vim.cmd("enew")
+    vim.api.nvim_buf_set_lines(0, 0, -1, false, { "alpha beta" })
+    vim.cmd("normal! 0ve")
+    vim.fn.setreg('"', "")
+    vim.fn.setreg("+", "")
+
+    press("<C-c>")
+
+    assert.are.same("alpha beta", vim.api.nvim_get_current_line())
+    assert.are.same("alpha", vim.fn.getreg("+"))
+    assert.are.same("alpha", vim.fn.getreg('"'))
+  end)
+
+  it("cuts only the selected text from visual mode without inserting literal text", function()
+    plugin.setup({ show_welcome = false, yanky_integration = false })
+    vim.cmd("enew")
+    vim.api.nvim_buf_set_lines(0, 0, -1, false, { "alpha beta" })
+    vim.cmd("normal! 0ve")
+    vim.fn.setreg('"', "")
+    vim.fn.setreg("+", "")
+
+    press("<C-x>")
+
+    assert.are.same(" beta", vim.api.nvim_get_current_line())
+    assert.are.same("alpha", vim.fn.getreg("+"))
+    assert.are.same("alpha", vim.fn.getreg('"'))
+  end)
+
+  it("uses yanky-ready visual clipboard mappings without corrupting the selection", function()
+    package.loaded["yanky"] = {}
+    vim.keymap.set({ "x", "v" }, "<Plug>(YankyYank)", "y")
+    vim.keymap.set("n", "<Plug>(YankyPutAfter)", "p")
+
+    plugin.setup({ show_welcome = false, yanky_integration = true })
+    vim.cmd("enew")
+    vim.api.nvim_buf_set_lines(0, 0, -1, false, { "alpha beta" })
+    vim.cmd("normal! 0ve")
+    vim.fn.setreg('"', "")
+    vim.fn.setreg("+", "")
+
+    press("<C-c>")
+
+    assert.are.same("alpha beta", vim.api.nvim_get_current_line())
+    assert.are.same("alpha", vim.fn.getreg("+"))
+    assert.are.same("alpha", vim.fn.getreg('"'))
+  end)
+
+  it("keeps cut synced to unnamed and system clipboard without yanky", function()
+    plugin.setup({ show_welcome = false, yanky_integration = false })
+    vim.cmd("enew")
+    vim.api.nvim_buf_set_lines(0, 0, -1, false, { "alpha beta" })
+    vim.cmd("normal! 0ve")
+    vim.fn.setreg('"', "")
+    vim.fn.setreg("+", "")
+
+    press("<C-x>")
+
+    assert.are.same(" beta", vim.api.nvim_get_current_line())
+    assert.are.same("alpha", vim.fn.getreg("+"))
+    assert.are.same("alpha", vim.fn.getreg('"'))
+  end)
+
+  it("keeps cut synced to unnamed and system clipboard with yanky-ready mappings", function()
+    package.loaded["yanky"] = {}
+    vim.keymap.set({ "x", "v" }, "<Plug>(YankyYank)", "y")
+    vim.keymap.set("n", "<Plug>(YankyPutAfter)", "p")
+
+    plugin.setup({ show_welcome = false, yanky_integration = true })
+    vim.cmd("enew")
+    vim.api.nvim_buf_set_lines(0, 0, -1, false, { "alpha beta" })
+    vim.cmd("normal! 0ve")
+    vim.fn.setreg('"', "")
+    vim.fn.setreg("+", "")
+
+    press("<C-x>")
+
+    assert.are.same(" beta", vim.api.nvim_get_current_line())
+    assert.are.same("alpha", vim.fn.getreg("+"))
+    assert.are.same("alpha", vim.fn.getreg('"'))
   end)
 end)
