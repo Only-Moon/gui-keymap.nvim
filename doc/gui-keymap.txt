@@ -1,4 +1,4 @@
-*gui-keymap.txt*         For Neovim >= 0.8.0        Last change: 2026 March 10
+*gui-keymap.txt*         For Neovim >= 0.8.0        Last change: 2026 March 13
 
 ==============================================================================
 Table of Contents                               *gui-keymap-table-of-contents*
@@ -363,6 +363,7 @@ ROADMAP                                   *gui-keymap-gui-keymap.nvim-roadmap*
 
 - Transition mode
 - GUI preset profiles (VSCode / JetBrains / Sublime)
+- Configurable search and replace hooks for external UI plugins
 - Advanced learning hints
 - Adaptive teaching system
 - Update changelog notification (planned for v2)
