@@ -625,6 +625,13 @@ local function normalize_mode(mode)
   return mode
 end
 
+local function expand_modes(mode)
+  if type(mode) == "table" then
+    return mode
+  end
+  return { mode }
+end
+
 ---@param mode string|string[]
 ---@param rhs string|function
 ---@return string|function
@@ -750,6 +757,45 @@ function M.explain_keys()
   local keys = vim.tbl_keys(M.explain)
   table.sort(keys)
   return keys
+end
+
+function M.audit_registry()
+  local issues = {}
+  local seen = {}
+
+  for index, item in ipairs(M.registry) do
+    if type(item.desc) ~= "string" or item.desc == "" then
+      table.insert(issues, string.format("entry %d is missing a description", index))
+    end
+
+    if type(item.feature) ~= "string" or item.feature == "" then
+      table.insert(issues, string.format("entry %d is missing a feature name", index))
+    end
+
+    if type(item.lhs) ~= "string" or item.lhs == "" then
+      table.insert(issues, string.format("entry %d is missing a left-hand side", index))
+    end
+
+    for _, mode in ipairs(expand_modes(item.mode)) do
+      local key = string.format("%s::%s", mode, item.lhs)
+      if seen[key] then
+        table.insert(
+          issues,
+          string.format(
+            "duplicate key assignment for %s in mode %s (entries %d and %d)",
+            item.lhs,
+            mode,
+            seen[key],
+            index
+          )
+        )
+      else
+        seen[key] = index
+      end
+    end
+  end
+
+  return issues
 end
 
 return M

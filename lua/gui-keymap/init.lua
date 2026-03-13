@@ -15,6 +15,7 @@ M.options = config.merge()
 M.version = version.current
 M._enforce_group = nil
 M._setup_done = false
+M._apply_scheduled = false
 
 function M.apply()
   if not state.enabled then
@@ -24,16 +25,25 @@ function M.apply()
   keymaps.apply(M.options)
 end
 
-local function schedule_enforcement_passes()
+function M.schedule_apply(delay)
+  local wait = delay or 0
+  if M._apply_scheduled then
+    return
+  end
+
+  M._apply_scheduled = true
+  vim.defer_fn(function()
+    M._apply_scheduled = false
+    M.apply()
+  end, wait)
+end
+
+local function schedule_enforcement_pass()
   if not M.options.enforce_on_startup then
     return
   end
 
-  for _, delay in ipairs({ 30, 180, 600 }) do
-    vim.defer_fn(function()
-      M.apply()
-    end, delay)
-  end
+  M.schedule_apply(80)
 end
 
 function M.setup_enforcement_autocmds()
@@ -47,7 +57,14 @@ function M.setup_enforcement_autocmds()
     group = M._enforce_group,
     pattern = { "VeryLazy", "LazyDone" },
     callback = function()
-      M.apply()
+      M.schedule_apply(0)
+    end,
+  })
+
+  vim.api.nvim_create_autocmd({ "UIEnter", "VimEnter" }, {
+    group = M._enforce_group,
+    callback = function()
+      M.schedule_apply(0)
     end,
   })
 end
@@ -72,7 +89,7 @@ function M.setup(user_opts)
   state.enabled = true
   M.apply()
   M.setup_enforcement_autocmds()
-  schedule_enforcement_passes()
+  schedule_enforcement_pass()
   onboard.setup(M.options)
   M._setup_done = true
 

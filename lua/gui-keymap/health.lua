@@ -1,4 +1,5 @@
 local config = require("gui-keymap.config")
+local keymaps = require("gui-keymap.keymaps")
 local utils = require("gui-keymap.utils")
 
 local M = {}
@@ -50,6 +51,15 @@ function M.check()
     ok("configuration is valid")
   else
     warn("configuration issues: " .. table.concat(validation_errors, ", "))
+  end
+
+  local registry_issues = keymaps.audit_registry()
+  if #registry_issues == 0 then
+    ok("keymap registry is internally consistent")
+  else
+    for _, issue in ipairs(registry_issues) do
+      warn("registry issue: " .. issue)
+    end
   end
 
   local state = utils.get_state()

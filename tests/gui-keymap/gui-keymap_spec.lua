@@ -19,6 +19,11 @@ describe("gui-keymap setup", function()
   before_each(function()
     utils.clear_plugin_maps()
     hints.reset()
+    if plugin._enforce_group then
+      pcall(vim.api.nvim_del_augroup_by_id, plugin._enforce_group)
+    end
+    plugin._enforce_group = nil
+    plugin._apply_scheduled = false
     package.loaded["yanky"] = nil
     package.loaded["lazy"] = nil
     package.loaded["lazy.core.config"] = nil
@@ -329,6 +334,12 @@ describe("gui-keymap setup", function()
     assert.is_true(vim.tbl_contains(keys, "<C-Del>"))
   end)
 
+  it("has a registry without duplicate key assignments or missing descriptions", function()
+    local issues = require("gui-keymap.keymaps").audit_registry()
+
+    assert.are.same({}, issues)
+  end)
+
   it("tracks requested mappings", function()
     plugin.setup({ show_welcome = false })
 
@@ -345,6 +356,16 @@ describe("gui-keymap setup", function()
     assert.are.same(4, state.hint_counts.save)
 
     vim.fn.delete(hint_file)
+  end)
+
+  it("creates a single enforcement augroup and keeps startup scheduling bounded", function()
+    plugin.setup({ show_welcome = false, enforce_on_startup = true })
+    local first_group = plugin._enforce_group
+
+    plugin.setup_enforcement_autocmds()
+
+    assert.are.same(first_group, plugin._enforce_group)
+    assert.is_not_nil(first_group)
   end)
 end)
 
