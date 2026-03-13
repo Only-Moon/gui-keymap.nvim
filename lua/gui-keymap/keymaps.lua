@@ -88,7 +88,7 @@ local function delete_previous_word_gui(target_mode)
   local col = vim.api.nvim_win_get_cursor(0)[2]
   local caret_char = byte_to_char(line, col)
 
-  if target_mode == "n" and str_char_count(line) > 0 then
+  if (target_mode == "n" or target_mode == "i") and str_char_count(line) > 0 then
     caret_char = math.min(caret_char + 1, str_char_count(line))
   end
 
@@ -127,6 +127,55 @@ end
 
 local function delete_prev_word_insert()
   delete_previous_word_gui("i")
+end
+
+local function delete_next_word_gui(target_mode)
+  local line = vim.api.nvim_get_current_line()
+  local col = vim.api.nvim_win_get_cursor(0)[2]
+  local caret_char = byte_to_char(line, col)
+  local total_chars = str_char_count(line)
+
+  if caret_char >= total_chars then
+    return
+  end
+
+  local finish_char = caret_char
+
+  if is_space(str_char_at(line, finish_char)) then
+    while finish_char < total_chars and is_space(str_char_at(line, finish_char)) do
+      finish_char = finish_char + 1
+    end
+  elseif is_keyword(str_char_at(line, finish_char)) then
+    while finish_char < total_chars and is_keyword(str_char_at(line, finish_char)) do
+      finish_char = finish_char + 1
+    end
+  else
+    while finish_char < total_chars do
+      local char = str_char_at(line, finish_char)
+      if is_space(char) or is_keyword(char) then
+        break
+      end
+      finish_char = finish_char + 1
+    end
+  end
+
+  while finish_char < total_chars and is_space(str_char_at(line, finish_char)) do
+    finish_char = finish_char + 1
+  end
+
+  if finish_char == caret_char then
+    return
+  end
+
+  apply_line_edit(caret_char, finish_char, target_mode)
+end
+
+local function delete_next_word_normal()
+  delete_next_word_gui("n")
+end
+
+local function delete_next_word_insert()
+  delete_next_word_gui("i")
 end
 
 ---@class GuiKeymapDefinition
@@ -520,7 +569,7 @@ M.registry = {
     force = true,
     mode = "n",
     lhs = "<C-Del>",
-    rhs = "dw",
+    rhs = delete_next_word_normal,
     desc = "gui-keymap: Delete next word",
     hint_key = "delete_next_word",
     preserve_mode = true,
@@ -539,8 +588,18 @@ M.registry = {
     feature = "word_delete",
     force = true,
     mode = "i",
+    lhs = "<C-h>",
+    rhs = delete_prev_word_insert,
+    desc = "gui-keymap: Delete previous word (terminal fallback)",
+    hint_key = "delete_prev_word",
+    preserve_mode = true,
+  },
+  {
+    feature = "word_delete",
+    force = true,
+    mode = "i",
     lhs = "<C-Del>",
-    rhs = "<C-o>dw",
+    rhs = delete_next_word_insert,
     desc = "gui-keymap: Delete next word",
     hint_key = "delete_next_word",
     preserve_mode = true,
@@ -568,7 +627,7 @@ M.registry = {
   {
     feature = "save",
     force = true,
-    mode = "x",
+    mode = "v",
     lhs = "<C-s>",
     rhs = save_buffer,
     desc = "gui-keymap: Save buffer",
@@ -665,7 +724,7 @@ M.explain = {
   ["<C-z>"] = { gui = "u", vim = "u" },
   ["<C-y>"] = { gui = "<C-r>", vim = "<C-r>" },
   ["<C-BS>"] = { gui = "delete previous word", vim = "closest: <C-w> (insert) / db (normal)" },
-  ["<C-Del>"] = { gui = "dw", vim = "dw" },
+  ["<C-Del>"] = { gui = "delete next word", vim = "closest: dw (GUI delete does not yank)" },
   ["<C-s>"] = { gui = ":write", vim = ":write / :w" },
   ["<C-q>"] = { gui = ":confirm wq", vim = ":wq" },
   ["<Home>"] = { gui = "0", vim = "0" },

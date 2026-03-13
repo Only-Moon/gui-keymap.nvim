@@ -29,6 +29,14 @@ local function press(keys, mode)
   vim.api.nvim_feedkeys(termcodes(keys), mode or "mx", false)
 end
 
+local function execute_map(mode, lhs)
+  local result = invoke_map_with_result(mode, lhs)
+  if type(result) == "string" and result ~= "" then
+    press(result, mode == "i" and "i" or "mx")
+    vim.cmd("redraw")
+  end
+end
+
 local function plus_register_available()
   local probe = "gui-keymap-test-probe"
   local old_value = vim.fn.getreg("+")
@@ -104,6 +112,7 @@ describe("gui-keymap setup", function()
     assert.is_true(map_present("n", "<C-Del>"))
     assert.is_true(map_present("i", "<C-BS>"))
     assert.is_true(map_present("i", "<C-Del>"))
+    assert.is_true(map_present("i", "<C-h>"))
   end)
 
   it("force-overrides configured keys", function()
@@ -519,6 +528,51 @@ describe("gui-keymap keycode mappings", function()
     assert.are.same("hello ", vim.api.nvim_get_current_line())
   end)
 
+  it("supports Ctrl+H as an insert-mode fallback for previous-word delete", function()
+    plugin.setup({ show_welcome = false })
+    vim.cmd("enew")
+    vim.api.nvim_buf_set_lines(0, 0, -1, false, { "hello world" })
+    vim.api.nvim_win_set_cursor(0, { 1, 11 })
+    vim.cmd("startinsert")
+
+    execute_map("i", "<C-h>")
+
+    assert.are.same("hello ", vim.api.nvim_get_current_line())
+  end)
+
+  it("deletes the next word without polluting unnamed or system clipboard in normal mode", function()
+    plugin.setup({ show_welcome = false, yanky_integration = false })
+    vim.cmd("enew")
+    vim.api.nvim_buf_set_lines(0, 0, -1, false, { "hello cruel world" })
+    vim.api.nvim_win_set_cursor(0, { 1, 6 })
+    seed_clipboard_registers("keep", "v")
+
+    execute_map("n", "<C-Del>")
+
+    assert.are.same("hello world", vim.api.nvim_get_current_line())
+    assert.are.same("keep", vim.fn.getreg('"'))
+    if plus_register_available() then
+      assert.are.same("keep", vim.fn.getreg("+"))
+    end
+  end)
+
+  it("deletes the next word without polluting unnamed or system clipboard in insert mode", function()
+    plugin.setup({ show_welcome = false, yanky_integration = false })
+    vim.cmd("enew")
+    vim.api.nvim_buf_set_lines(0, 0, -1, false, { "hello cruel world" })
+    vim.api.nvim_win_set_cursor(0, { 1, 6 })
+    seed_clipboard_registers("keep", "v")
+    vim.cmd("startinsert")
+
+    execute_map("i", "<C-Del>")
+
+    assert.are.same("hello world", vim.api.nvim_get_current_line())
+    assert.are.same("keep", vim.fn.getreg('"'))
+    if plus_register_available() then
+      assert.are.same("keep", vim.fn.getreg("+"))
+    end
+  end)
+
   it("copies the selected text from visual mode without corrupting the buffer", function()
     plugin.setup({ show_welcome = false, yanky_integration = false })
     vim.cmd("enew")
@@ -529,7 +583,7 @@ describe("gui-keymap keycode mappings", function()
       vim.fn.setreg("+", "")
     end
 
-    press("<C-c>")
+    execute_map("v", "<C-c>")
 
     assert.are.same("alpha beta", vim.api.nvim_get_current_line())
     assert.are.same("alpha", vim.fn.getreg('"'))
@@ -713,7 +767,7 @@ describe("gui-keymap hints", function()
       return
     end
 
-    if lhs == "<C-s>" and mode == "x" then
+    if lhs == "<C-s>" and mode == "v" then
       vim.api.nvim_buf_set_lines(0, 0, -1, false, { "one" })
       vim.cmd("normal! v")
       return
