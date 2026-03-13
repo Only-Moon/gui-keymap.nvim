@@ -367,6 +367,23 @@ describe("gui-keymap setup", function()
     assert.are.same(first_group, plugin._enforce_group)
     assert.is_not_nil(first_group)
   end)
+
+  it("tracks yanky integration state through state helpers", function()
+    state.reset_yanky_probe()
+    state.set_yanky_status(true, false, true, "installed-not-loaded", "lazy-registry")
+
+    assert.are.same(true, state.yanky_available)
+    assert.are.same(false, state.yanky_loaded)
+    assert.are.same(true, state.yanky_enabled)
+    assert.are.same("installed-not-loaded", state.yanky_status)
+    assert.are.same("lazy-registry", state.yanky_source)
+    assert.are.same(true, state.yanky_checked)
+
+    state.reset_yanky_probe()
+
+    assert.are.same(false, state.yanky_checked)
+    assert.are.same(false, state.yanky_probe_attempted)
+  end)
 end)
 
 describe("gui-keymap demo", function()

@@ -32,6 +32,24 @@ function M.set_config(cfg)
   M.config = cfg or {}
 end
 
+function M.set_yanky_status(available, loaded, enabled, status, source)
+  M.yanky_available = available
+  M.yanky_loaded = loaded
+  M.yanky_enabled = available and enabled
+  M.yanky_status = status or (available and (loaded and "ready" or "installed") or "absent")
+  M.yanky_source = source or ""
+  M.yanky_checked = true
+end
+
+function M.reset_yanky_probe()
+  M.yanky_checked = false
+  M.yanky_probe_attempted = false
+end
+
+function M.set_which_key_status(available)
+  M.which_key_available = available
+end
+
 function M.clear_session()
   M.active_maps = {}
   M.conflicts = {}

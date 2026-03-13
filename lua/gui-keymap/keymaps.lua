@@ -692,7 +692,7 @@ end
 
 local function register_with_which_key(opts)
   local ok, wk = pcall(require, "which-key")
-  utils.set_which_key_status(ok)
+  utils.get_state().set_which_key_status(ok)
 
   if not ok or opts.which_key_integration == false then
     return

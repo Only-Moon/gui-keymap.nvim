@@ -67,18 +67,6 @@ function M.mark_feature_disabled(feature)
   state.disabled_features[feature] = true
 end
 
-function M.set_yanky_status(available, loaded, enabled, status, source)
-  state.yanky_available = available
-  state.yanky_loaded = loaded
-  state.yanky_enabled = available and enabled
-  state.yanky_status = status or (available and (loaded and "ready" or "installed") or "absent")
-  state.yanky_source = source or ""
-end
-
-function M.set_which_key_status(available)
-  state.which_key_available = available
-end
-
 function M.get_state()
   return state
 end

@@ -72,8 +72,7 @@ end
 
 local function update_status(enabled, available, loaded, status, source)
   local state = utils.get_state()
-  utils.set_yanky_status(available, loaded, enabled, status, source)
-  state.yanky_checked = true
+  state.set_yanky_status(available, loaded, enabled, status, source)
 end
 
 local function attempt_lazy_load()
@@ -230,9 +229,8 @@ end
 
 function M.detect_status(enabled)
   local state = utils.get_state()
-  state.yanky_probe_attempted = false
+  state.reset_yanky_probe()
   probe_yanky(false)
-  state.yanky_checked = true
   if enabled ~= true then
     state.yanky_enabled = false
   end
