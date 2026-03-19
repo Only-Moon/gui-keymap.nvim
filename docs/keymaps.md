@@ -40,6 +40,11 @@ Visual mode:
 
 These use the black-hole register so clipboard contents are preserved.
 
+## Word deletion notes
+
+- `Ctrl+Backspace` and `Ctrl+Delete` are implemented with GUI-style delete behavior, not literal yank-producing Vim motions.
+- In some terminals, insert-mode `Ctrl+Backspace` arrives as `<C-h>`. gui-keymap supports that fallback.
+
 ## Shift+Arrow selection
 
 ### Normal mode

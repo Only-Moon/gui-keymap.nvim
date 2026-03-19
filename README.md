@@ -44,11 +44,11 @@ On first install/update, the plugin also shows a one-time welcome notification.
 | Ctrl+Z | Undo | `u` |
 | Ctrl+Y | Redo | `<C-r>` |
 | Ctrl+S | Save | `:write` |
-| Ctrl+Q | Save and close window or buffer | `:wq` / `:update \| close` |
+| Ctrl+Q | Save and close | `:confirm wq` |
 | Home | Move to line start | `0` |
 | End | Move to line end | `$` |
-| Ctrl+Backspace | Delete previous word | `db` |
-| Ctrl+Delete | Delete next word | `dw` |
+| Ctrl+Backspace | Delete previous word | GUI-style previous-word delete |
+| Ctrl+Delete | Delete next word | GUI-style next-word delete |
 
 ## Installation
 
@@ -160,9 +160,9 @@ If you do not pass `opts`, these defaults are used automatically.
 | `select_all` | `true` | Enable `Ctrl+A` select-all mappings. |
 | `delete_selection` | `true` | Enable visual-mode `<BS>` and `<Del>` black-hole delete mappings. |
 | `shift_selection` | `true` | Enable Shift+Arrow selection mappings and terminal fallbacks. |
-| `word_delete` | `true` | Enable `Ctrl+Backspace` and `Ctrl+Delete` word deletion mappings. |
+| `word_delete` | `true` | Enable GUI-style `Ctrl+Backspace` and `Ctrl+Delete` word deletion mappings. |
 | `save` | `true` | Enable `Ctrl+S` save mappings. |
-| `quit` | `true` | Enable `Ctrl+Q` save-and-close mappings. |
+| `quit` | `true` | Enable `Ctrl+Q` save-and-close mappings using `:confirm wq`. |
 | `home_end` | `true` | Enable `Home` / `End` line movement mappings. |
 | `yanky_integration` | `true` | Prefer Yanky-backed clipboard behavior when Yanky is installed. |
 | `hint_enabled` | `true` | Show adaptive Vim learning hints for GUI shortcuts. |
@@ -210,7 +210,7 @@ It also reports:
 ## Compatibility Notes
 
 - Shift + Arrow mappings depend on your terminal emitting shifted-arrow keycodes. On some terminals the plugin will use fallback codes such as `<kL>` and `<kR>`, but support still varies by terminal emulator and multiplexer.
-- `Ctrl+Backspace` and `Ctrl+Delete` are terminal-dependent on Windows Terminal, tmux, WSL shells, and some Linux/macOS terminal defaults.
+- `Ctrl+Backspace` and `Ctrl+Delete` are terminal-dependent on Windows Terminal, tmux, WSL shells, and some Linux/macOS terminal defaults. Some terminals send `Ctrl+Backspace` as `<C-h>`, and gui-keymap supports that insert-mode fallback.
 - System clipboard behavior depends on Neovim clipboard support and your environment. When `yanky.nvim` is available, clipboard actions prefer Yanky. Otherwise gui-keymap falls back to Neovim register sync.
 - If a terminal does not emit the expected keycodes, `:GuiKeymapInfo` and `:checkhealth gui-keymap` will help you confirm which mappings were applied and which fallback mappings are active.
 

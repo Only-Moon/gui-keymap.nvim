@@ -85,6 +85,8 @@ Enables:
 
 Mapped to GUI-style word deletion behavior that avoids polluting clipboard state.
 
+Some terminals send `Ctrl+Backspace` as `<C-h>`. gui-keymap supports that insert-mode fallback.
+
 ### `save`
 
 Enables `Ctrl+S` to save the current buffer.

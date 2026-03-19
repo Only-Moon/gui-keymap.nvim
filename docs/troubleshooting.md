@@ -63,6 +63,17 @@ Check:
 
 - Yanky status in `:GuiKeymapInfo`
 - conflict summary in `:GuiKeymapInfo`
+- clipboard provider status in `:checkhealth`
+
+If Neovim has no clipboard provider, gui-keymap falls back to unnamed-register behavior instead of assuming `+` is available.
+
+## `Ctrl+Backspace` behaves like plain Backspace
+
+This is usually terminal input translation, not a plugin logic failure.
+
+Some terminals send `Ctrl+Backspace` as `<C-h>`.
+
+gui-keymap supports an insert-mode `<C-h>` fallback, but terminal behavior still varies.
 
 ## Hints are not appearing
 
