@@ -31,11 +31,7 @@ local function quit_current_insert()
   quit_current()
 end
 
-local function select_all_visual()
-  vim.api.nvim_feedkeys(termcodes("<Esc>ggVG"), "nx", false)
-end
-
-local function select_all_insert()
+local function select_all_with_feedkeys()
   vim.api.nvim_feedkeys(termcodes("<Esc>ggVG"), "nx", false)
 end
 
@@ -305,7 +301,7 @@ M.registry = {
     force = true,
     mode = "v",
     lhs = "<C-a>",
-    rhs = select_all_visual,
+    rhs = select_all_with_feedkeys,
     desc = "gui-keymap: Select all",
     hint_key = "select_all",
     preserve_mode = false,
@@ -315,7 +311,7 @@ M.registry = {
     force = true,
     mode = "i",
     lhs = "<C-a>",
-    rhs = select_all_insert,
+    rhs = select_all_with_feedkeys,
     desc = "gui-keymap: Select all",
     hint_key = "select_all",
     preserve_mode = false,
@@ -772,41 +768,58 @@ local function expand_modes(mode)
   return { mode }
 end
 
----@param rhs string|function
----@return string|function
-local function materialize_rhs(rhs)
-  if type(rhs) == "function" then
-    return rhs
+---@param lhs string
+---@return boolean
+local function is_fallback_shift_key(lhs)
+  return lhs:match("^<k[LRUD]>$") ~= nil
+end
+
+---@param feature string
+---@param lhs string
+---@return boolean
+local function is_terminal_sensitive_map(feature, lhs)
+  if feature == "shift_selection" then
+    return true
   end
 
-  return rhs
+  if lhs:match("^<S%-") then
+    return true
+  end
+
+  return is_fallback_shift_key(lhs)
+end
+
+---@param item GuiKeymapDefinition
+local function track_map_characteristics(item)
+  if is_fallback_shift_key(item.lhs) then
+    utils.mark_fallback_map(item.mode, item.lhs)
+  end
+
+  if is_terminal_sensitive_map(item.feature, item.lhs) then
+    utils.mark_terminal_sensitive(item.mode, item.lhs)
+  end
+end
+
+---@param item GuiKeymapDefinition
+---@param opts GuiKeymapOptions
+local function apply_registry_item(item, opts)
+  track_map_characteristics(item)
+
+  local rhs, hint_opts = hints.wrap(item.mode, item.rhs, item.hint_key)
+  local map_opts = vim.tbl_extend("force", { desc = item.desc, silent = true, noremap = true }, hint_opts or {})
+  utils.safe_map(item.mode, item.lhs, rhs, map_opts, item.feature, item.force and opts.force_priority)
 end
 
 ---@param opts GuiKeymapOptions
 local function apply_main_registry(opts)
   for _, item in ipairs(M.registry) do
-    if item_enabled(opts, item) then
-      if item.lhs:match("^<k[LRUD]>$") then
-        utils.mark_fallback_map(item.mode, item.lhs)
-      end
-      if item.feature == "shift_selection" or item.lhs:match("^<S%-") or item.lhs:match("^<k[LRUD]>$") then
-        utils.mark_terminal_sensitive(item.mode, item.lhs)
-      end
-
-      local rhs = materialize_rhs(item.rhs)
-      local hint_opts
-      rhs, hint_opts = hints.wrap(item.mode, rhs, item.hint_key)
-      utils.safe_map(
-        item.mode,
-        item.lhs,
-        rhs,
-        vim.tbl_extend("force", { desc = item.desc, silent = true, noremap = true }, hint_opts or {}),
-        item.feature,
-        item.force and opts.force_priority
-      )
-    else
+    if not item_enabled(opts, item) then
       utils.mark_feature_disabled(item.feature)
+      goto continue
     end
+
+    apply_registry_item(item, opts)
+    ::continue::
   end
 end
 
