@@ -1,4 +1,4 @@
-*gui-keymap.txt*         For Neovim >= 0.8.0        Last change: 2026 March 13
+*gui-keymap.txt*         For Neovim >= 0.8.0        Last change: 2026 March 27
 
 ==============================================================================
 Table of Contents                               *gui-keymap-table-of-contents*
@@ -81,9 +81,7 @@ GUI -> VIM KEYMAP COMPARISON*gui-keymap-gui-keymap.nvim-gui-->-vim-keymap-compar
 
   Ctrl+S                     Save           :write
 
-  Ctrl+Q                     Save and close :wq / :update \| close
-                             window or      
-                             buffer         
+  Ctrl+Q                     Save and close :confirm wq
 
   Home                       Move to line   0
                              start          
@@ -91,10 +89,10 @@ GUI -> VIM KEYMAP COMPARISON*gui-keymap-gui-keymap.nvim-gui-->-vim-keymap-compar
   End                        Move to line   $
                              end            
 
-  Ctrl+Backspace             Delete         db
-                             previous word  
+  Ctrl+Backspace             Delete         GUI-style previous-word
+                             previous word  delete
 
-  Ctrl+Delete                Delete next    dw
+  Ctrl+Delete                Delete next    GUI-style next-word delete
                              word           
   -----------------------------------------------------------------------
 
@@ -219,15 +217,17 @@ If you do not pass `opts`, these defaults are used automatically.
                                                    selection mappings and
                                                    terminal fallbacks.
 
-  word_delete             true                     Enable Ctrl+Backspace
-                                                   and Ctrl+Delete word
+  word_delete             true                     Enable GUI-style
+                                                   Ctrl+Backspace and
+                                                   Ctrl+Delete word
                                                    deletion mappings.
 
   save                    true                     Enable Ctrl+S save
                                                    mappings.
 
   quit                    true                     Enable Ctrl+Q
-                                                   save-and-close mappings.
+                                                   save-and-close mappings
+                                                   using :confirm wq.
 
   home_end                true                     Enable Home / End line
                                                    movement mappings.
@@ -318,7 +318,7 @@ fallback mappings - hint persistence state
 COMPATIBILITY NOTES           *gui-keymap-gui-keymap.nvim-compatibility-notes*
 
 - Shift + Arrow mappings depend on your terminal emitting shifted-arrow keycodes. On some terminals the plugin will use fallback codes such as `<kL>` and `<kR>`, but support still varies by terminal emulator and multiplexer.
-- `Ctrl+Backspace` and `Ctrl+Delete` are terminal-dependent on Windows Terminal, tmux, WSL shells, and some Linux/macOS terminal defaults.
+- `Ctrl+Backspace` and `Ctrl+Delete` are terminal-dependent on Windows Terminal, tmux, WSL shells, and some Linux/macOS terminal defaults. Some terminals send `Ctrl+Backspace` as `<C-h>`, and gui-keymap supports that insert-mode fallback.
 - System clipboard behavior depends on Neovim clipboard support and your environment. When `yanky.nvim` is available, clipboard actions prefer Yanky. Otherwise gui-keymap falls back to Neovim register sync.
 - If a terminal does not emit the expected keycodes, `:GuiKeymapInfo` and `:checkhealth gui-keymap` will help you confirm which mappings were applied and which fallback mappings are active.
 
