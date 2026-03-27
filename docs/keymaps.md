@@ -2,34 +2,38 @@
 
 ## GUI shortcut table
 
-| Shortcut | Mode | Behavior | Vim equivalent |
-|----------|------|----------|----------------|
-| `Ctrl+C` | normal | copy line | `yy` |
-| `Ctrl+C` | visual | copy selection | `y` |
-| `Ctrl+V` | normal | paste | `p` |
-| `Ctrl+V` | insert | paste | insert paste |
-| `Ctrl+X` | visual | cut selection | `d` |
-| `Ctrl+A` | normal | select all | `ggVG` |
-| `Ctrl+A` | insert | select all | `<Esc>ggVG` |
-| `Ctrl+Z` | normal | undo | `u` |
-| `Ctrl+Z` | insert | undo | `<C-o>u` |
-| `Ctrl+Y` | normal | redo | `<C-r>` |
-| `Ctrl+Y` | insert | redo | `<C-o><C-r>` |
-| `Ctrl+S` | normal | save buffer | `:write` |
-| `Ctrl+S` | insert | save buffer | `:write` |
-| `Ctrl+S` | visual | save buffer | `:write` |
-| `Ctrl+Q` | normal | save and close | `:confirm wq` |
-| `Ctrl+Q` | insert | save and close | `:confirm wq` |
-| `Home` | normal | line start | `0` |
-| `Home` | insert | line start | `<C-o>0` |
-| `Home` | visual | line start | `0` |
-| `End` | normal | line end | `$` |
-| `End` | insert | line end | `<C-o>$` |
-| `End` | visual | line end | `$` |
-| `Ctrl+Backspace` | normal | delete previous word | GUI-style previous-word delete |
-| `Ctrl+Backspace` | insert | delete previous word | GUI-style previous-word delete |
-| `Ctrl+Delete` | normal | delete next word | GUI-style next-word delete |
-| `Ctrl+Delete` | insert | delete next word | GUI-style next-word delete |
+This page follows the same teaching order as `:GuiKeymapDemo`:
+
+`GUI shortcut -> Vim equivalent -> action`
+
+| Shortcut | Mode | Vim equivalent | Action |
+|----------|------|----------------|--------|
+| `Ctrl+C` | normal | `yy` | Copy line |
+| `Ctrl+C` | visual | `y` | Copy selection |
+| `Ctrl+V` | normal | `p` | Paste |
+| `Ctrl+V` | insert | insert paste | Paste |
+| `Ctrl+X` | visual | `d` | Cut selection |
+| `Ctrl+A` | normal | `ggVG` | Select all |
+| `Ctrl+A` | insert | `<Esc>ggVG` | Select all |
+| `Ctrl+Z` | normal | `u` | Undo |
+| `Ctrl+Z` | insert | `<C-o>u` | Undo |
+| `Ctrl+Y` | normal | `<C-r>` | Redo |
+| `Ctrl+Y` | insert | `<C-o><C-r>` | Redo |
+| `Ctrl+S` | normal | `:write` | Save buffer |
+| `Ctrl+S` | insert | `:write` | Save buffer |
+| `Ctrl+S` | visual | `:write` | Save buffer |
+| `Ctrl+Q` | normal | `:confirm wq` | Save and close |
+| `Ctrl+Q` | insert | `:confirm wq` | Save and close |
+| `Home` | normal | `0` | Move to line start |
+| `Home` | insert | `<C-o>0` | Move to line start |
+| `Home` | visual | `0` | Move to line start |
+| `End` | normal | `$` | Move to line end |
+| `End` | insert | `<C-o>$` | Move to line end |
+| `End` | visual | `$` | Move to line end |
+| `Ctrl+Backspace` | normal | GUI-style previous-word delete | Delete previous word |
+| `Ctrl+Backspace` | insert | GUI-style previous-word delete | Delete previous word |
+| `Ctrl+Delete` | normal | GUI-style next-word delete | Delete next word |
+| `Ctrl+Delete` | insert | GUI-style next-word delete | Delete next word |
 
 ## Delete-selection mappings
 

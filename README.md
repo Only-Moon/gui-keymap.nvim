@@ -35,20 +35,20 @@ On first install/update, the plugin also shows a one-time welcome notification.
 
 ## GUI -> Vim Keymap Comparison
 
-| GUI Shortcut | Action | Vim Equivalent |
-|--------------|--------|----------------|
-| Ctrl+C | Copy | `y` / `yy` |
-| Ctrl+V | Paste | `p` |
-| Ctrl+X | Cut | `d` |
-| Ctrl+A | Select All | `ggVG` |
-| Ctrl+Z | Undo | `u` |
-| Ctrl+Y | Redo | `<C-r>` |
-| Ctrl+S | Save | `:write` |
-| Ctrl+Q | Save and close | `:confirm wq` |
-| Home | Move to line start | `0` |
-| End | Move to line end | `$` |
-| Ctrl+Backspace | Delete previous word | GUI-style previous-word delete |
-| Ctrl+Delete | Delete next word | GUI-style next-word delete |
+| GUI Shortcut | Vim Equivalent | Action |
+|--------------|----------------|--------|
+| Ctrl+C | `y` / `yy` | Copy |
+| Ctrl+V | `p` | Paste |
+| Ctrl+X | `d` | Cut |
+| Ctrl+A | `ggVG` | Select All |
+| Ctrl+Z | `u` | Undo |
+| Ctrl+Y | `<C-r>` | Redo |
+| Ctrl+S | `:write` | Save |
+| Ctrl+Q | `:confirm wq` | Save and close |
+| Home | `0` | Move to line start |
+| End | `$` | Move to line end |
+| Ctrl+Backspace | GUI-style previous-word delete | Delete previous word |
+| Ctrl+Delete | GUI-style next-word delete | Delete next word |
 
 ## Installation
 

@@ -32,6 +32,12 @@ It provides:
 3. Test the shortcuts in the scratch buffer.
 4. Open `:GuiKeymapInfo` if something does not behave as expected.
 
+The demo and keymap reference use the same teaching order:
+
+- GUI shortcut
+- Vim equivalent
+- resulting action
+
 ## Project links
 
 - Repository: [Only-Moon/gui-keymap.nvim](https://github.com/Only-Moon/gui-keymap.nvim)
