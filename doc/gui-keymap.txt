@@ -65,35 +65,35 @@ FEATURES                                 *gui-keymap-gui-keymap.nvim-features*
 GUI -> VIM KEYMAP COMPARISON*gui-keymap-gui-keymap.nvim-gui-->-vim-keymap-comparison*
 
   -----------------------------------------------------------------------
-  GUI Shortcut               Action         Vim Equivalent
-  -------------------------- -------------- -----------------------------
-  Ctrl+C                     Copy           y / yy
+  GUI Shortcut               Vim Equivalent                Action
+  -------------------------- ----------------------------- --------------
+  Ctrl+C                     y / yy                        Copy
 
-  Ctrl+V                     Paste          p
+  Ctrl+V                     p                             Paste
 
-  Ctrl+X                     Cut            d
+  Ctrl+X                     d                             Cut
 
-  Ctrl+A                     Select All     ggVG
+  Ctrl+A                     ggVG                          Select All
 
-  Ctrl+Z                     Undo           u
+  Ctrl+Z                     u                             Undo
 
-  Ctrl+Y                     Redo           <C-r>
+  Ctrl+Y                     <C-r>                         Redo
 
-  Ctrl+S                     Save           :write
+  Ctrl+S                     :write                        Save
 
-  Ctrl+Q                     Save and close :confirm wq
+  Ctrl+Q                     :confirm wq                   Save and close
 
-  Home                       Move to line   0
-                             start          
+  Home                       0                             Move to line
+                                                           start
 
-  End                        Move to line   $
-                             end            
+  End                        $                             Move to line
+                                                           end
 
-  Ctrl+Backspace             Delete         GUI-style previous-word
-                             previous word  delete
+  Ctrl+Backspace             GUI-style previous-word       Delete
+                             delete                        previous word
 
-  Ctrl+Delete                Delete next    GUI-style next-word delete
-                             word           
+  Ctrl+Delete                GUI-style next-word delete    Delete next
+                                                           word
   -----------------------------------------------------------------------
 
 INSTALLATION                         *gui-keymap-gui-keymap.nvim-installation*
