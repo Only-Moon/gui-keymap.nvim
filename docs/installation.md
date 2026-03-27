@@ -50,18 +50,6 @@ Then:
 require("gui-keymap").setup({})
 ```
 
-## LuaRocks
-
-```sh
-luarocks install gui-keymap.nvim
-```
-
-Then:
-
-```lua
-require("gui-keymap").setup({})
-```
-
 ## First-run flow
 
 If welcome notifications are enabled, the plugin shows a one-time onboarding

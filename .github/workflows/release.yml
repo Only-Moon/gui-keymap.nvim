@@ -8,26 +8,7 @@ permissions:
   contents: write
 
 jobs:
-  luarocks-upload:
+  release:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Check rockspec presence
-        id: rockspec
-        shell: bash
-        run: |
-          if ls *.rockspec >/dev/null 2>&1; then
-            echo "present=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "present=false" >> "$GITHUB_OUTPUT"
-          fi
-      - name: Skip release upload when rockspec is missing
-        if: steps.rockspec.outputs.present != 'true'
-        run: echo "No rockspec found, skipping LuaRocks upload."
-      - name: LuaRocks Upload
-        if: steps.rockspec.outputs.present == 'true'
-        uses: nvim-neorocks/luarocks-tag-release@v7
-        env:
-          LUAROCKS_API_KEY: ${{ secrets.LUAROCKS_API_KEY }}
+      - run: echo "No release automation is configured for tags yet."

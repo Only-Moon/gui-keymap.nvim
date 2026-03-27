@@ -101,18 +101,6 @@ Then call:
 require("gui-keymap").setup({})
 ```
 
-### LuaRocks
-
-```sh
-luarocks install gui-keymap.nvim
-```
-
-Then load it in your `init.lua`:
-
-```lua
-require("gui-keymap").setup({})
-```
-
 ## Quick Start
 
 1. Install the plugin with your plugin manager.
