@@ -1,8 +1,9 @@
 local state = require("gui-keymap.state")
+local utils = require("gui-keymap.utils")
 
 local M = {}
 
-local HINT_STATE_FILE = vim.fn.stdpath("state") .. "/gui-keymap-hints.json"
+local HINT_STATE_FILE = utils.path_join(vim.fn.stdpath("state"), "gui-keymap-hints.json")
 
 local templates = {
   copy = {

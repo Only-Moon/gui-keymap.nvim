@@ -100,10 +100,23 @@ require("gui-keymap").setup(opts)
 
 ### Native packages
 
+Linux / macOS:
+
 ```sh
 git clone https://github.com/Only-Moon/gui-keymap.nvim \
   ~/.local/share/nvim/site/pack/gui/start/gui-keymap.nvim
 ```
+
+Windows PowerShell:
+
+```powershell
+git clone https://github.com/Only-Moon/gui-keymap.nvim `
+  "$env:LOCALAPPDATA\\nvim-data\\site\\pack\\gui\\start\\gui-keymap.nvim"
+```
+
+If you prefer a portable path that matches your current Neovim install, use the
+plugin manager route or clone into your `stdpath("data")` pack directory for
+your platform.
 
 Then call:
 

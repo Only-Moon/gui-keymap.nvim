@@ -1,6 +1,29 @@
 local state = require("gui-keymap.state")
 
 local M = {}
+local path_separator = package.config:sub(1, 1)
+
+---@param ... string
+---@return string
+function M.path_join(...)
+  local parts = { ... }
+  local cleaned = {}
+
+  for index, part in ipairs(parts) do
+    if type(part) == "string" and part ~= "" then
+      local current = part
+      if index > 1 then
+        current = current:gsub("^[/\\]+", "")
+      end
+      if index < #parts then
+        current = current:gsub("[/\\]+$", "")
+      end
+      table.insert(cleaned, current)
+    end
+  end
+
+  return table.concat(cleaned, path_separator)
+end
 
 local function normalize_modes(mode)
   if type(mode) == "table" then

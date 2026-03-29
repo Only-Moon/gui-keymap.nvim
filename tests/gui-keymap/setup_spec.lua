@@ -339,7 +339,7 @@ describe("gui-keymap setup", function()
   end)
 
   it("loads persisted hint counts when enabled", function()
-    local hint_file = vim.fn.stdpath("state") .. "/gui-keymap-hints.json"
+    local hint_file = require("gui-keymap.utils").path_join(vim.fn.stdpath("state"), "gui-keymap-hints.json")
     vim.fn.delete(hint_file)
     vim.fn.mkdir(vim.fn.fnamemodify(hint_file, ":h"), "p")
     vim.fn.writefile({ vim.json.encode({ counts = { save = 4 } }) }, hint_file)

@@ -1,7 +1,8 @@
 local M = {}
 
 local version = require("gui-keymap.version")
-local STATE_FILE = vim.fn.stdpath("state") .. "/gui-keymap-onboard.json"
+local utils = require("gui-keymap.utils")
+local STATE_FILE = utils.path_join(vim.fn.stdpath("state"), "gui-keymap-onboard.json")
 
 local function current_identity()
   return version.identity()

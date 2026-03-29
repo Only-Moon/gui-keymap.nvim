@@ -3,6 +3,38 @@ local M = {}
 local hints = require("gui-keymap.hints")
 local plugin = require("gui-keymap")
 local utils = require("gui-keymap.utils")
+local original_clipboard = vim.g.clipboard
+local clipboard_store = {
+  ["+"] = { lines = {}, regtype = "v" },
+  ["*"] = { lines = {}, regtype = "v" },
+}
+
+local function reset_fake_clipboard()
+  clipboard_store["+"] = { lines = {}, regtype = "v" }
+  clipboard_store["*"] = { lines = {}, regtype = "v" }
+end
+
+local function install_fake_clipboard()
+  vim.g.clipboard = {
+    name = "gui-keymap-test",
+    copy = {
+      ["+"] = function(lines, regtype)
+        clipboard_store["+"] = { lines = vim.deepcopy(lines), regtype = regtype }
+      end,
+      ["*"] = function(lines, regtype)
+        clipboard_store["*"] = { lines = vim.deepcopy(lines), regtype = regtype }
+      end,
+    },
+    paste = {
+      ["+"] = function()
+        return vim.deepcopy(clipboard_store["+"].lines), clipboard_store["+"].regtype
+      end,
+      ["*"] = function()
+        return vim.deepcopy(clipboard_store["*"].lines), clipboard_store["*"].regtype
+      end,
+    },
+  }
+end
 
 function M.map_present(mode, lhs)
   local mapping = vim.fn.maparg(lhs, mode, false, true)
@@ -55,6 +87,8 @@ function M.seed_clipboard_registers(value, regtype)
 end
 
 function M.reset_runtime()
+  install_fake_clipboard()
+  reset_fake_clipboard()
   utils.clear_plugin_maps()
   local state = require("gui-keymap.state")
   state.hint_counts = {}
@@ -137,6 +171,10 @@ function M.prepare_for_mapping(mode, lhs)
   end
 
   vim.api.nvim_buf_set_lines(0, 0, -1, false, { "one", "two" })
+end
+
+function M.restore_clipboard()
+  vim.g.clipboard = original_clipboard
 end
 
 return M
