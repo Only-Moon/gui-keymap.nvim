@@ -3,7 +3,8 @@
 ## Default configuration
 
 ```lua
-require("gui-keymap").setup({
+---@type GuiKeymapOptions
+local opts = {
   undo_redo = true,
   clipboard = {
     copy = true,
@@ -26,10 +27,15 @@ require("gui-keymap").setup({
   force_priority = true,
   show_welcome = true,
   preserve_mode = true,
-})
+}
+
+require("gui-keymap").setup(opts)
 ```
 
 If you pass no options, these defaults are used automatically.
+
+`GuiKeymapOptions` is the user-facing partial config type. The plugin merges it
+into a strict internal config before validation and mapping setup.
 
 ## Option reference
 
@@ -168,17 +174,23 @@ mapped action finishes.
 ## Recommended minimal setup
 
 ```lua
-require("gui-keymap").setup({
+---@type GuiKeymapOptions
+local opts = {
   show_welcome = true,
-})
+}
+
+require("gui-keymap").setup(opts)
 ```
 
 ## Conservative setup
 
 ```lua
-require("gui-keymap").setup({
+---@type GuiKeymapOptions
+local opts = {
   shift_selection = false,
   force_priority = false,
   hint_enabled = false,
-})
+}
+
+require("gui-keymap").setup(opts)
 ```

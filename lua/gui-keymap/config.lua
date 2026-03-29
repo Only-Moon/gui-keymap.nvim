@@ -1,13 +1,18 @@
 local M = {}
 
----@class GuiKeymapClipboardOptions
+---@class (exact) GuiKeymapClipboardOptionsStrict
 ---@field copy boolean
 ---@field paste boolean
 ---@field cut boolean
 
----@class GuiKeymapOptions
+---@class GuiKeymapClipboardOptions
+---@field copy? boolean
+---@field paste? boolean
+---@field cut? boolean
+
+---@class (exact) GuiKeymapOptionsStrict
 ---@field undo_redo boolean
----@field clipboard GuiKeymapClipboardOptions|boolean
+---@field clipboard GuiKeymapClipboardOptionsStrict
 ---@field select_all boolean
 ---@field delete_selection boolean
 ---@field shift_selection boolean
@@ -30,7 +35,32 @@ local M = {}
 ---@field undo boolean|nil
 ---@field redo boolean|nil
 
----@type GuiKeymapOptions
+---@class GuiKeymapOptions
+---@field undo_redo? boolean
+---@field clipboard? GuiKeymapClipboardOptions|boolean
+---@field select_all? boolean
+---@field delete_selection? boolean
+---@field shift_selection? boolean
+---@field word_delete? boolean
+---@field save? boolean
+---@field quit? boolean
+---@field home_end? boolean
+---@field yanky_integration? boolean
+---@field hint_enabled? boolean
+---@field hint_repeat? integer
+---@field hint_persist? boolean
+---@field which_key_integration? boolean
+---@field enforce_on_startup? boolean
+---@field force_priority? boolean
+---@field show_welcome? boolean
+---@field preserve_mode? boolean
+---@field copy? boolean
+---@field paste? boolean
+---@field cut? boolean
+---@field undo? boolean
+---@field redo? boolean
+
+---@type GuiKeymapOptionsStrict
 M.defaults = {
   undo_redo = true,
   clipboard = {
@@ -61,7 +91,7 @@ M.defaults = {
   redo = nil,
 }
 
----@param merged GuiKeymapOptions
+---@param merged GuiKeymapOptionsStrict
 local function normalize_legacy_clipboard_toggles(merged)
   if type(merged.clipboard) == "boolean" then
     merged.clipboard = {
@@ -84,7 +114,7 @@ local function normalize_legacy_clipboard_toggles(merged)
   end
 end
 
----@param merged GuiKeymapOptions
+---@param merged GuiKeymapOptionsStrict
 local function sanitize(merged)
   for key, default in pairs(M.defaults) do
     if key ~= "clipboard" and key ~= "copy" and key ~= "paste" and key ~= "cut" and key ~= "undo" and key ~= "redo" then
@@ -110,8 +140,9 @@ local function sanitize(merged)
 end
 
 ---@param user_opts GuiKeymapOptions|nil
----@return GuiKeymapOptions
+---@return GuiKeymapOptionsStrict
 function M.merge(user_opts)
+  ---@type GuiKeymapOptionsStrict
   local merged = vim.tbl_deep_extend("force", {}, M.defaults, user_opts or {})
   normalize_legacy_clipboard_toggles(merged)
   sanitize(merged)
@@ -137,7 +168,7 @@ local boolean_fields = {
   "preserve_mode",
 }
 
----@param opts GuiKeymapOptions
+---@param opts GuiKeymapOptionsStrict
 ---@return string[]
 function M.validate(opts)
   local errors = {}

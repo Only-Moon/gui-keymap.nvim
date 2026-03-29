@@ -1,3 +1,4 @@
+---@type GuiKeymapOptionsStrict|table
 local M = {
   enabled = true,
   config = {},

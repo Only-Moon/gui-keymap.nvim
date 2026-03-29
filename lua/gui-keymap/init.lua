@@ -10,7 +10,7 @@ local version = require("gui-keymap.version")
 
 local M = {}
 
----@type GuiKeymapOptions
+---@type GuiKeymapOptionsStrict
 M.options = config.merge()
 M.version = version.current
 M._enforce_group = nil
@@ -70,7 +70,7 @@ function M.setup_enforcement_autocmds()
 end
 
 ---@param user_opts GuiKeymapOptions|nil
----@return GuiKeymapOptions
+---@return GuiKeymapOptionsStrict
 function M.setup(user_opts)
   if M._setup_done and user_opts == nil then
     return M.options

@@ -57,6 +57,7 @@ On first install/update, the plugin also shows a one-time welcome notification.
 ```lua
 {
   "Only-Moon/gui-keymap.nvim",
+  ---@type GuiKeymapOptions
   opts = {},
 }
 ```
@@ -64,7 +65,10 @@ On first install/update, the plugin also shows a one-time welcome notification.
 If `lazy.nvim` is not installed, use one of the methods below and call:
 
 ```lua
-require("gui-keymap").setup({})
+---@type GuiKeymapOptions
+local opts = {}
+
+require("gui-keymap").setup(opts)
 ```
 
 ### packer.nvim
@@ -73,7 +77,10 @@ require("gui-keymap").setup({})
 use({
   "Only-Moon/gui-keymap.nvim",
   config = function()
-    require("gui-keymap").setup({})
+    ---@type GuiKeymapOptions
+    local opts = {}
+
+    require("gui-keymap").setup(opts)
   end,
 })
 ```
@@ -85,7 +92,10 @@ Plug 'Only-Moon/gui-keymap.nvim'
 ```
 
 ```lua
-require("gui-keymap").setup({})
+---@type GuiKeymapOptions
+local opts = {}
+
+require("gui-keymap").setup(opts)
 ```
 
 ### Native packages
@@ -98,7 +108,10 @@ git clone https://github.com/Only-Moon/gui-keymap.nvim \
 Then call:
 
 ```lua
-require("gui-keymap").setup({})
+---@type GuiKeymapOptions
+local opts = {}
+
+require("gui-keymap").setup(opts)
 ```
 
 ## Quick Start
@@ -111,7 +124,8 @@ require("gui-keymap").setup({})
 ## Configuration
 
 ```lua
-require("gui-keymap").setup({
+---@type GuiKeymapOptions
+local opts = {
   undo_redo = true,
   clipboard = {
     copy = true,
@@ -134,10 +148,15 @@ require("gui-keymap").setup({
   force_priority = true,
   show_welcome = true,
   preserve_mode = true,
-})
+}
+
+require("gui-keymap").setup(opts)
 ```
 
 If you do not pass `opts`, these defaults are used automatically.
+
+`GuiKeymapOptions` is the user-facing partial config type. Internally the plugin
+merges it into a strict full config before applying mappings.
 
 | Option | Default | Purpose |
 |--------|---------|---------|

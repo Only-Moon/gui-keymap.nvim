@@ -56,7 +56,12 @@ end
 
 function M.reset_runtime()
   utils.clear_plugin_maps()
-  hints.reset()
+  local state = require("gui-keymap.state")
+  state.hint_counts = {}
+  state.hint_last_ts = {}
+  hints.enabled = false
+  hints.persist = false
+  hints.max_repeat = 3
   if plugin._enforce_group then
     pcall(vim.api.nvim_del_augroup_by_id, plugin._enforce_group)
   end

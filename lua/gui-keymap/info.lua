@@ -12,7 +12,7 @@ local function sorted_summary(summary)
   return lines
 end
 
----@param opts GuiKeymapOptions
+---@param opts GuiKeymapOptionsStrict
 ---@return string[]
 local function build_lines(opts)
   local state = utils.get_state()
@@ -149,7 +149,7 @@ function M.open_explain(key, item)
   utils.open_scratch_window("GuiKeymapExplain", lines, "gui-keymap-info")
 end
 
----@param opts GuiKeymapOptions
+---@param opts GuiKeymapOptionsStrict
 function M.show(opts)
   M.open_report(opts)
 end

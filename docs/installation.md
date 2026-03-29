@@ -10,6 +10,7 @@
 ```lua
 {
   "Only-Moon/gui-keymap.nvim",
+  ---@type GuiKeymapOptions
   opts = {},
 }
 ```
@@ -20,7 +21,10 @@
 use({
   "Only-Moon/gui-keymap.nvim",
   config = function()
-    require("gui-keymap").setup({})
+    ---@type GuiKeymapOptions
+    local opts = {}
+
+    require("gui-keymap").setup(opts)
   end,
 })
 ```
@@ -34,7 +38,10 @@ Plug 'Only-Moon/gui-keymap.nvim'
 Then:
 
 ```lua
-require("gui-keymap").setup({})
+---@type GuiKeymapOptions
+local opts = {}
+
+require("gui-keymap").setup(opts)
 ```
 
 ## Native packages
@@ -47,7 +54,10 @@ git clone https://github.com/Only-Moon/gui-keymap.nvim \
 Then:
 
 ```lua
-require("gui-keymap").setup({})
+---@type GuiKeymapOptions
+local opts = {}
+
+require("gui-keymap").setup(opts)
 ```
 
 ## First-run flow

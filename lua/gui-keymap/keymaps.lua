@@ -727,7 +727,7 @@ M.explain = {
   ["<End>"] = { gui = "$", vim = "$" },
 }
 
----@param opts GuiKeymapOptions
+---@param opts GuiKeymapOptionsStrict
 ---@param item GuiKeymapDefinition
 ---@return boolean
 local function item_enabled(opts, item)
@@ -801,7 +801,7 @@ local function track_map_characteristics(item)
 end
 
 ---@param item GuiKeymapDefinition
----@param opts GuiKeymapOptions
+---@param opts GuiKeymapOptionsStrict
 local function apply_registry_item(item, opts)
   track_map_characteristics(item)
 
@@ -810,7 +810,7 @@ local function apply_registry_item(item, opts)
   utils.safe_map(item.mode, item.lhs, rhs, map_opts, item.feature, item.force and opts.force_priority)
 end
 
----@param opts GuiKeymapOptions
+---@param opts GuiKeymapOptionsStrict
 local function apply_main_registry(opts)
   for _, item in ipairs(M.registry) do
     if not item_enabled(opts, item) then
@@ -823,7 +823,7 @@ local function apply_main_registry(opts)
   end
 end
 
----@param opts GuiKeymapOptions
+---@param opts GuiKeymapOptionsStrict
 local function apply_yanky_registry(opts)
   clipboard.detect_status(opts.yanky_integration)
 
@@ -881,7 +881,7 @@ local function register_with_which_key(opts)
   end
 end
 
----@param opts GuiKeymapOptions
+---@param opts GuiKeymapOptionsStrict
 function M.apply(opts)
   utils.clear_plugin_maps()
   apply_main_registry(opts)

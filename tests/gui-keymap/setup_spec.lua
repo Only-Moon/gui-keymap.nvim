@@ -129,7 +129,7 @@ describe("gui-keymap setup", function()
 
   it("selects all in normal mode via Ctrl+A", function()
     plugin.setup({ show_welcome = false })
-    vim.cmd("enew")
+    vim.cmd("enew!")
     vim.api.nvim_buf_set_lines(0, 0, -1, false, { "one", "two", "three" })
     vim.api.nvim_win_set_cursor(0, { 2, 1 })
 
@@ -141,7 +141,7 @@ describe("gui-keymap setup", function()
 
   it("re-selects all when Ctrl+A is pressed from visual mode", function()
     plugin.setup({ show_welcome = false })
-    vim.cmd("enew")
+    vim.cmd("enew!")
     vim.api.nvim_buf_set_lines(0, 0, -1, false, { "one", "two", "three" })
     vim.cmd("normal! ggVj")
 

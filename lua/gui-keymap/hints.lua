@@ -252,7 +252,7 @@ function M.wrap(mode, rhs, hint_key)
   end, { expr = true }
 end
 
----@param opts GuiKeymapOptions
+---@param opts GuiKeymapOptionsStrict
 function M.setup(opts)
   M.enabled = opts.hint_enabled == true
   M.max_repeat = tonumber(opts.hint_repeat) or 3
