@@ -1,4 +1,4 @@
-*gui-keymap.txt*         For Neovim >= 0.8.0        Last change: 2026 March 27
+*gui-keymap.txt*         For Neovim >= 0.8.0        Last change: 2026 March 29
 
 ==============================================================================
 Table of Contents                               *gui-keymap-table-of-contents*
@@ -104,6 +104,7 @@ LAZY.NVIM ~
 >lua
     {
       "Only-Moon/gui-keymap.nvim",
+      ---@type GuiKeymapOptions
       opts = {},
     }
 <
@@ -111,7 +112,10 @@ LAZY.NVIM ~
 If `lazy.nvim` is not installed, use one of the methods below and call:
 
 >lua
-    require("gui-keymap").setup({})
+    ---@type GuiKeymapOptions
+    local opts = {}
+    
+    require("gui-keymap").setup(opts)
 <
 
 
@@ -121,7 +125,10 @@ PACKER.NVIM ~
     use({
       "Only-Moon/gui-keymap.nvim",
       config = function()
-        require("gui-keymap").setup({})
+        ---@type GuiKeymapOptions
+        local opts = {}
+    
+        require("gui-keymap").setup(opts)
       end,
     })
 <
@@ -134,21 +141,40 @@ VIM-PLUG ~
 <
 
 >lua
-    require("gui-keymap").setup({})
+    ---@type GuiKeymapOptions
+    local opts = {}
+    
+    require("gui-keymap").setup(opts)
 <
 
 
 NATIVE PACKAGES ~
+
+Linux / macOS:
 
 >sh
     git clone https://github.com/Only-Moon/gui-keymap.nvim \
       ~/.local/share/nvim/site/pack/gui/start/gui-keymap.nvim
 <
 
+Windows PowerShell:
+
+>powershell
+    git clone https://github.com/Only-Moon/gui-keymap.nvim `
+      "$env:LOCALAPPDATA\\nvim-data\\site\\pack\\gui\\start\\gui-keymap.nvim"
+<
+
+If you prefer a portable path that matches your current Neovim install, use the
+plugin manager route or clone into your `stdpath("data")` pack directory for
+your platform.
+
 Then call:
 
 >lua
-    require("gui-keymap").setup({})
+    ---@type GuiKeymapOptions
+    local opts = {}
+    
+    require("gui-keymap").setup(opts)
 <
 
 
@@ -163,7 +189,8 @@ QUICK START                           *gui-keymap-gui-keymap.nvim-quick-start*
 CONFIGURATION                       *gui-keymap-gui-keymap.nvim-configuration*
 
 >lua
-    require("gui-keymap").setup({
+    ---@type GuiKeymapOptions
+    local opts = {
       undo_redo = true,
       clipboard = {
         copy = true,
@@ -186,10 +213,15 @@ CONFIGURATION                       *gui-keymap-gui-keymap.nvim-configuration*
       force_priority = true,
       show_welcome = true,
       preserve_mode = true,
-    })
+    }
+    
+    require("gui-keymap").setup(opts)
 <
 
 If you do not pass `opts`, these defaults are used automatically.
+
+`GuiKeymapOptions` is the user-facing partial config type. Internally the
+plugin merges it into a strict full config before applying mappings.
 
   -------------------------------------------------------------------------
   Option                  Default                  Purpose
